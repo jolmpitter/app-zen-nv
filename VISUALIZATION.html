@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VISUALIZATION - GESTÃO ZEN</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        background: '#0a0a0a', // Darker background
+                        card: '#111827', // Dark card
+                        primary: '#4F46E5',
+                        secondary: '#1f2937',
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #000; color: #fff; }
+        .glass { background: rgba(17, 24, 39, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        .icon-3d {
+            width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .icon-green { background: rgba(16, 185, 129, 0.2); color: #10B981; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .icon-red { background: rgba(239, 68, 68, 0.2); color: #EF4444; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .icon-yellow { background: rgba(245, 158, 11, 0.2); color: #F59E0B; border: 1px solid rgba(245, 158, 11, 0.3); }
+        .icon-blue { background: rgba(59, 130, 246, 0.2); color: #3B82F6; border: 1px solid rgba(59, 130, 246, 0.3); }
+        
+        /* Simulação de animação de entrada */
+        .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; opacity: 0; transform: translateY(10px); }
+        @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
+    </style>
+</head>
+<body class="p-6">
+
+    <!-- Top Bar -->
+    <div class="flex justify-between items-center mb-8 animate-fade-in">
+        <div>
+            <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-600">Dashboard</h1>
+            <p class="text-gray-400">Bem-vindo, Gerente</p>
+        </div>
+        <div class="flex items-center gap-4">
+            <span class="px-3 py-1 rounded-full border border-purple-500/30 text-purple-400 text-sm bg-purple-500/10">Gerente</span>
+            <div class="w-10 h-10 rounded-full bg-gray-700"></div>
+        </div>
+    </div>
+
+    <!-- Filters Mock -->
+    <div class="glass p-6 rounded-2xl mb-8 animate-fade-in delay-100">
+        <h2 class="text-xl font-bold mb-4">Filtros</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <label class="block text-sm text-gray-400 mb-1">Período</label>
+                <div class="h-10 bg-gray-800 rounded-lg border border-gray-700 flex items-center px-3 text-sm text-gray-300">Últimos 30 dias</div>
+            </div>
+            <div>
+                <label class="block text-sm text-gray-400 mb-1">Tipo</label>
+                <div class="h-10 bg-gray-800 rounded-lg border border-gray-700 flex items-center px-3 text-sm text-gray-300">Por Atendente</div>
+            </div>
+            <div>
+                <label class="block text-sm text-gray-400 mb-1">Usuário</label>
+                <div class="h-10 bg-gray-800 rounded-lg border border-gray-700 flex items-center px-3 text-sm text-gray-300">Todos</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 animate-fade-in delay-200">
+        <!-- Total Vendido -->
+        <div class="glass p-5 rounded-xl transition hover:-translate-y-1 hover:shadow-lg hover:shadow-green-500/10 cursor-default">
+            <div class="flex justify-between items-start mb-4">
+                <div class="icon-3d icon-green">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                </div>
+                <span class="text-xs font-semibold text-gray-500 uppercase">Total Vendido</span>
+            </div>
+            <h3 class="text-2xl font-bold">R$ 154.230,00</h3>
+            <p class="text-xs text-green-400 mt-1">+12% vs mês anterior</p>
+        </div>
+
+        <!-- Total Gasto -->
+        <div class="glass p-5 rounded-xl transition hover:-translate-y-1 hover:shadow-lg hover:shadow-red-500/10 cursor-default">
+            <div class="flex justify-between items-start mb-4">
+                <div class="icon-3d icon-red">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
+                </div>
+                <span class="text-xs font-semibold text-gray-500 uppercase">Total Gasto</span>
+            </div>
+            <h3 class="text-2xl font-bold">R$ 42.500,00</h3>
+            <p class="text-xs text-red-400 mt-1">+5% vs mês anterior</p>
+        </div>
+
+        <!-- ROI -->
+        <div class="glass p-5 rounded-xl transition hover:-translate-y-1 hover:shadow-lg hover:shadow-yellow-500/10 cursor-default">
+            <div class="flex justify-between items-start mb-4">
+                <div class="icon-3d icon-yellow">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                </div>
+                <span class="text-xs font-semibold text-gray-500 uppercase">ROI</span>
+            </div>
+            <h3 class="text-2xl font-bold">263.5%</h3>
+            <p class="text-xs text-yellow-500 mt-1">Ótimo Desempenho</p>
+        </div>
+
+        <!-- Leads -->
+        <div class="glass p-5 rounded-xl transition hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/10 cursor-default">
+            <div class="flex justify-between items-start mb-4">
+                <div class="icon-3d icon-blue">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+                <span class="text-xs font-semibold text-gray-500 uppercase">Leads</span>
+            </div>
+            <h3 class="text-2xl font-bold">1,245</h3>
+            <p class="text-xs text-blue-400 mt-1">CPL Médio: R$ 34,13</p>
+        </div>
+    </div>
+
+    <!-- Charts Mock -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 animate-fade-in delay-300">
+        <!-- Main Chart Area -->
+        <div class="lg:col-span-2 glass p-6 rounded-2xl">
+            <h3 class="text-lg font-bold mb-4">Evolução de Vendas x Gastos</h3>
+            <div class="w-full h-64 bg-gray-800/50 rounded-lg flex items-end justify-between p-4 px-8 relative overflow-hidden">
+                <!-- Mock Bars -->
+                <div class="w-2 h-[40%] bg-blue-500 rounded-t"></div>
+                <div class="w-2 h-[50%] bg-blue-500 rounded-t"></div>
+                <div class="w-2 h-[30%] bg-blue-500 rounded-t"></div>
+                <div class="w-2 h-[60%] bg-blue-500 rounded-t"></div>
+                <div class="w-2 h-[70%] bg-blue-500 rounded-t"></div>
+                <div class="w-2 h-[55%] bg-blue-500 rounded-t"></div>
+                <div class="w-2 h-[80%] bg-blue-500 rounded-t"></div>
+                <div class="w-2 h-[65%] bg-blue-500 rounded-t"></div>
+                <div class="w-2 h-[90%] bg-blue-500 rounded-t"></div>
+                <div class="w-2 h-[75%] bg-blue-500 rounded-t"></div>
+                
+                <!-- Overlay Line for ROAS -->
+                <svg class="absolute inset-0 w-full h-full p-4 pointer-events-none" preserveAspectRatio="none">
+                    <path d="M0,200 C50,150 100,180 150,100 C200,50 250,120 300,80 C350,40 400,60 450,20" fill="none" stroke="#10B981" stroke-width="2"/>
+                </svg>
+            </div>
+            <div class="flex justify-center gap-6 mt-4 text-xs text-gray-400">
+                <span class="flex items-center gap-2"><div class="w-2 h-2 bg-blue-500 rounded-full"></div> Vendas</span>
+                <span class="flex items-center gap-2"><div class="w-2 h-2 bg-green-500 rounded-full"></div> ROAS</span>
+            </div>
+        </div>
+
+        <!-- Funnel Mock -->
+        <div class="glass p-6 rounded-2xl">
+            <h3 class="text-lg font-bold mb-4">Funil de Conversão</h3>
+            <div class="space-y-4">
+                <div class="relative pt-2">
+                    <div class="flex justify-between text-xs mb-1"><span>Impressões</span> <span class="text-white font-bold">150k</span></div>
+                    <div class="w-full h-2 bg-gray-700 rounded-full"><div class="h-2 bg-blue-500 rounded-full" style="width: 100%"></div></div>
+                </div>
+                <div class="relative pt-2">
+                    <div class="flex justify-between text-xs mb-1"><span>Cliques (CTR 2.5%)</span> <span class="text-white font-bold">3.75k</span></div>
+                    <div class="w-full h-2 bg-gray-700 rounded-full"><div class="h-2 bg-indigo-500 rounded-full" style="width: 75%"></div></div>
+                </div>
+                <div class="relative pt-2">
+                    <div class="flex justify-between text-xs mb-1"><span>Leads (Conv. 33%)</span> <span class="text-white font-bold">1,245</span></div>
+                    <div class="w-full h-2 bg-gray-700 rounded-full"><div class="h-2 bg-purple-500 rounded-full" style="width: 50%"></div></div>
+                </div>
+                <div class="relative pt-2">
+                    <div class="flex justify-between text-xs mb-1"><span>Vendas (Conv. 12%)</span> <span class="text-white font-bold">150</span></div>
+                    <div class="w-full h-2 bg-gray-700 rounded-full"><div class="h-2 bg-pink-500 rounded-full" style="width: 25%"></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table Mock -->
+    <div class="glass rounded-2xl overflow-hidden animate-fade-in delay-300">
+        <div class="p-6 border-b border-gray-800">
+            <h3 class="text-lg font-bold">Pipeline de Leads Recentes</h3>
+        </div>
+        <table class="w-full text-left text-sm text-gray-400">
+            <thead class="bg-gray-800/50 text-gray-200 uppercase text-xs">
+                <tr>
+                    <th class="px-6 py-4">Nome</th>
+                    <th class="px-6 py-4">Status</th>
+                    <th class="px-6 py-4">Origem</th>
+                    <th class="px-6 py-4 text-right">Valor</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-800">
+                <tr class="hover:bg-white/5 transition">
+                    <td class="px-6 py-4 font-medium text-white">Roberto Silva</td>
+                    <td class="px-6 py-4"><span class="px-2 py-1 rounded text-xs bg-yellow-500/20 text-yellow-400">Em Negociação</span></td>
+                    <td class="px-6 py-4">Facebook Ads</td>
+                    <td class="px-6 py-4 text-right text-white">R$ 1.500,00</td>
+                </tr>
+                <tr class="hover:bg-white/5 transition">
+                    <td class="px-6 py-4 font-medium text-white">Ana Paula</td>
+                    <td class="px-6 py-4"><span class="px-2 py-1 rounded text-xs bg-green-500/20 text-green-400">Venda Realizada</span></td>
+                    <td class="px-6 py-4">Google Ads</td>
+                    <td class="px-6 py-4 text-right text-white">R$ 3.200,00</td>
+                </tr>
+                <tr class="hover:bg-white/5 transition">
+                    <td class="px-6 py-4 font-medium text-white">Carlos Souza</td>
+                    <td class="px-6 py-4"><span class="px-2 py-1 rounded text-xs bg-blue-500/20 text-blue-400">Novo Lead</span></td>
+                    <td class="px-6 py-4">Instagram</td>
+                    <td class="px-6 py-4 text-right text-white">-</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="text-center mt-12 text-gray-500 text-sm">
+        <p>Visualização estática gerada por <strong>Antigravity</strong></p>
+    </div>
+
+</body>
+</html>

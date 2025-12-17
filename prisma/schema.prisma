@@ -1,0 +1,232 @@
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+generator client {
+    provider = "prisma-client-js"
+    binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
+    output = "/home/ubuntu/gestao_trafego_crm/nextjs_space/node_modules/.prisma/client"
+}
+
+model User {
+  id                  String              @id @default(cuid())
+  name                String
+  email               String              @unique
+  password            String
+  role                String              // "gerente", "gestor" ou "atendente"
+  avatarUrl           String?             // URL da foto de perfil
+  facebookAccessToken String?             // Token de acesso do Facebook Ads (deprecated - mantido para compatibilidade)
+  facebookAdAccountId String?             // ID da conta de anúncios do Facebook (deprecated - mantido para compatibilidade)
+  gestorId            String?             // Para atendentes: ID do gestor responsável
+  gestor              User?               @relation("GestorAtendentes", fields: [gestorId], references: [id], onDelete: SetNull)
+  atendentes          User[]              @relation("GestorAtendentes")
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+
+  // Relações
+  dailyMetrics       DailyMetric[]
+  leads              Lead[]
+  leadHistories      LeadHistory[]
+  facebookAdAccounts FacebookAdAccount[]
+  scheduledReports   ScheduledReport[]
+  reportLinks        ReportLink[]
+  campaignChangeLogs CampaignChangeLog[]
+  alerts             Alert[]
+
+  @@index([email])
+  @@index([gestorId])
+  @@index([role])
+}
+
+model DailyMetric {
+  id                        String   @id @default(cuid())
+  date                      DateTime
+  userId                    String
+  user                      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  valorGasto                Float    @default(0)
+  quantidadeLeads           Int      @default(0)
+  quantidadeVendas          Int      @default(0)
+  valorVendido              Float    @default(0)
+  // Métricas de vendas orgânicas (disparos para leads da base)
+  quantidadeVendasOrganicas Int      @default(0) // Vendas de leads que já estavam na base
+  valorVendidoOrganico      Float    @default(0) // Valor total de vendas orgânicas
+  roi                       Float    @default(0) // Calculado: ((valorVendido - valorGasto) / valorGasto) * 100
+  custoPorLead              Float    @default(0) // Calculado: valorGasto / quantidadeLeads
+  taxaConversao             Float    @default(0) // Calculado: (quantidadeVendas / quantidadeLeads) * 100
+  ticketMedio               Float    @default(0) // Calculado: valorVendido / quantidadeVendas
+  // Novos campos detalhados de campanha
+  bmName                    String?  // Nome do Business Manager
+  contaAnuncio              String?  // Conta de Anúncio
+  criativo                  String?  // Nome/ID do criativo
+  pagina                    String?  // Página da campanha
+  valorComissao             Float    @default(0) // Valor total de comissão
+  totalCliques              Int      @default(0) // Total de cliques
+  cartaoUsado               String?  // Cartão usado para pagamento
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
+
+  @@unique([userId, date])
+  @@index([date])
+  @@index([userId])
+  @@index([userId, date]) // Índice composto para queries de range de data por usuário
+  @@index([date, userId]) // Índice composto alternativo para ordenação por data
+}
+
+model Lead {
+  id              String        @id @default(cuid())
+  name            String
+  email           String?
+  phone           String?
+  status          String        @default("novo") // novo, em_andamento, concluido, perdido
+  source          String?       // origem do lead
+  valorPotencial  Float?        // valor potencial da venda
+  valorFechado    Float?        // valor real da venda (se concluído)
+  notes           String?       @db.Text
+  cidade          String?       // cidade do lead
+  estado          String?       // estado do lead (sigla: SP, RJ, etc.)
+  atendenteId     String
+  atendente       User          @relation(fields: [atendenteId], references: [id], onDelete: Cascade)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  closedAt        DateTime?     // data de conclusão/perda
+
+  // Relações
+  history         LeadHistory[]
+
+  @@index([atendenteId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([estado])
+  @@index([cidade])
+  @@index([atendenteId, status]) // Índice composto para filtro por atendente e status
+  @@index([status, createdAt]) // Índice composto para filtro por status com ordenação por data
+  @@index([updatedAt]) // Índice para queries ordenadas por última atualização
+}
+
+model LeadHistory {
+  id          String   @id @default(cuid())
+  leadId      String
+  lead        Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  action      String   // status_change, note_added, call_made, email_sent, etc.
+  description String   @db.Text
+  oldValue    String?
+  newValue    String?
+  createdAt   DateTime @default(now())
+
+  @@index([leadId])
+  @@index([createdAt])
+}
+
+model FacebookAdAccount {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accountName String   // Nome amigável da conta (ex: "Cliente X - Campanha Y")
+  accountId   String   // ID da conta de anúncios (ex: act_123456789)
+  accessToken String   @db.Text // Token de acesso do Facebook Ads
+  isActive    Boolean  @default(true) // Se esta conta está ativa/selecionada
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relações
+  scheduledReports   ScheduledReport[]
+  campaignChangeLogs CampaignChangeLog[]
+
+  @@unique([userId, accountId])
+  @@index([userId])
+  @@index([isActive])
+}
+
+model ScheduledReport {
+  id                   String            @id @default(cuid())
+  userId               String
+  user                 User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  facebookAdAccountId  String
+  facebookAdAccount    FacebookAdAccount @relation(fields: [facebookAdAccountId], references: [id], onDelete: Cascade)
+  name                 String            // Nome do relatório (ex: "Relatório Semanal - Cliente X")
+  frequency            String            // daily, weekly, monthly
+  dayOfWeek            Int?              // 0-6 (Domingo-Sábado) para relatórios semanais
+  dayOfMonth           Int?              // 1-31 para relatórios mensais
+  hour                 Int               @default(9) // Hora do dia para envio (0-23)
+  recipients           String            @db.Text // Emails separados por vírgula
+  includeMetrics       Boolean           @default(true) // Incluir cards de métricas
+  includeFunnel        Boolean           @default(true) // Incluir funil de conversão
+  includeTimeSeries    Boolean           @default(true) // Incluir gráficos temporais
+  isActive             Boolean           @default(true)
+  lastSentAt           DateTime?
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+
+  // Relações
+  reportLinks ReportLink[]
+
+  @@index([userId])
+  @@index([facebookAdAccountId])
+  @@index([isActive])
+  @@index([frequency])
+}
+
+model ReportLink {
+  id                String          @id @default(cuid())
+  scheduledReportId String?
+  scheduledReport   ScheduledReport? @relation(fields: [scheduledReportId], references: [id], onDelete: SetNull)
+  userId            String
+  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token             String          @unique // Token único para acesso público
+  reportData        String          @db.Text // JSON com dados do relatório
+  expiresAt         DateTime?       // Data de expiração (opcional)
+  viewCount         Int             @default(0)
+  lastViewedAt      DateTime?
+  createdAt         DateTime        @default(now())
+
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
+}
+
+model CampaignChangeLog {
+  id                   String            @id @default(cuid())
+  userId               String
+  user                 User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  facebookAdAccountId  String
+  facebookAdAccount    FacebookAdAccount @relation(fields: [facebookAdAccountId], references: [id], onDelete: Cascade)
+  campaignId           String            // ID da campanha do Meta Ads
+  changeType           String            // status_change, budget_change, name_change, etc
+  previousValue        String?
+  newValue             String?
+  metadata             String?           @db.Text // JSON string com detalhes adicionais
+  createdAt            DateTime          @default(now())
+
+  @@index([userId])
+  @@index([facebookAdAccountId])
+  @@index([campaignId])
+  @@index([createdAt])
+}
+
+model Alert {
+  id          String   @id @default(cuid())
+  userId      String   // Usuário que receberá o alerta
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type        String   // roi_negativo, conversao_baixa, gasto_excessivo, lead_nao_contatado, etc.
+  severity    String   // baixa, media, alta, critica
+  title       String   // Título do alerta
+  message     String   @db.Text // Mensagem detalhada
+  data        String?  @db.Text // JSON com dados relevantes
+  isRead      Boolean  @default(false)
+  isResolved  Boolean  @default(false)
+  resolvedAt  DateTime?
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([type])
+  @@index([severity])
+  @@index([isRead])
+  @@index([isResolved])
+  @@index([createdAt])
+  @@index([userId, isRead]) // Índice composto para alertas não lidos por usuário
+  @@index([userId, isResolved]) // Índice composto para alertas não resolvidos por usuário
+  @@index([userId, createdAt]) // Índice composto para alertas recentes por usuário
+}

@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /dashboard
+Disallow: /crm
+Disallow: /usuarios
+Disallow: /metricas
+Disallow: /perfil
+Disallow: /integracoes
+
+Sitemap: https://imagemstore.shop/sitemap.xml

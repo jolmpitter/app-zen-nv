@@ -1,0 +1,353 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Nova Paleta Moderna - Gestão Polo */
+    --background: 217 33% 17%;
+    /* #1f2937 - Cinza escuro */
+    --foreground: 0 0% 100%;
+    /* Branco para contraste */
+
+    --card: 0 0% 100%;
+    /* Branco */
+    --card-foreground: 222.2 47.4% 11.2%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 47.4% 11.2%;
+
+    --primary: 239 84% 58%;
+    /* #4F46E5 - Indigo moderno */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 13% 91%;
+    /* #E5E7EB - Gray suave */
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 220 13% 91%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 239 100% 97%;
+    /* #EEF2FF - Indigo claro */
+    --accent-foreground: 239 84% 58%;
+
+    --destructive: 0 84.2% 60.2%;
+    /* #EF4444 */
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 160 84% 39%;
+    /* #10B981 */
+    --warning: 38 92% 50%;
+    /* #F59E0B */
+    --info: 199 89% 48%;
+    /* #0EA5E9 */
+
+    --border: 220 13% 91%;
+    /* #E5E7EB */
+    --input: 220 13% 91%;
+    --ring: 239 84% 58%;
+
+    --radius: 0.875rem;
+    /* 14px - Bordas arredondadas modernas */
+
+    /* Cores de Gráficos Gradientes */
+    --chart-1: 239 84% 58%;
+    /* Indigo primário */
+    --chart-2: 160 84% 39%;
+    /* Verde sucesso */
+    --chart-3: 38 92% 50%;
+    /* Amarelo atenção */
+    --chart-4: 199 89% 48%;
+    /* Azul informação */
+    --chart-5: 280 81% 60%;
+    /* Roxo acento */
+  }
+
+  .dark {
+    --background: 0 0% 0%;
+    /* Preto puro */
+    --foreground: 0 0% 100%;
+    /* Branco puro para contraste máximo */
+
+    --card: 0 0% 8%;
+    /* Card muito escuro */
+    --card-foreground: 0 0% 98%;
+
+    --popover: 0 0% 5%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 45 100% 50%;
+    /* Amarelo vibrante */
+    --primary-foreground: 0 0% 0%;
+
+    --secondary: 0 0% 15%;
+    /* Cinza muito escuro */
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 60%;
+
+    --accent: 45 90% 20%;
+    /* Amarelo escuro para accent */
+    --accent-foreground: 45 100% 60%;
+
+    --destructive: 0 72% 50%;
+    --destructive-foreground: 0 0% 98%;
+
+    --success: 160 84% 39%;
+    --warning: 38 92% 50%;
+    --info: 199 89% 48%;
+
+    --border: 0 0% 20%;
+    /* Border escuro */
+    --input: 0 0% 15%;
+    --ring: 45 100% 50%;
+
+    --chart-1: 45 100% 50%;
+    --chart-2: 160 84% 39%;
+    --chart-3: 38 92% 50%;
+    --chart-4: 199 89% 48%;
+    --chart-5: 280 81% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    transition: all 0.25s ease;
+    /* Animações suaves globais */
+  }
+
+  body {
+    @apply text-foreground;
+    background: linear-gradient(135deg, #000000 0%, #1a1a00 50%, #000000 100%) !important;
+    background-attachment: fixed;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-weight: 500;
+    /* Peso médio por padrão */
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-weight: 600;
+    /* Peso semibold para títulos */
+  }
+}
+
+/* Sombra leve para cards */
+@layer components {
+  .card-shadow {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  }
+
+  .card-shadow-hover:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+  }
+
+  /* ============================
+     MELHORIAS VISUAIS DO DASHBOARD
+     ============================ */
+
+  /* CARD/SECTION DE FILTROS */
+  .filter-card {
+    background: #111827 !important;
+    padding: 32px !important;
+    border-radius: 20px !important;
+    border: 1px solid #1f2937 !important;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.45) !important;
+    transition: 0.3s ease;
+  }
+
+  /* TÍTULO Filtros */
+  .filter-card h2 {
+    color: #f9fafb !important;
+    font-size: 1.8rem !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.5px;
+  }
+
+  /* Subtítulo explicativo */
+  .filter-card .subtitle {
+    color: #cbd5e1 !important;
+    font-size: 1.05rem !important;
+    margin-bottom: 22px !important;
+    line-height: 1.45;
+  }
+
+  /* LABELS (Período / Tipo de Filtro / Atendente) */
+  .filter-label {
+    color: #e2e8f0 !important;
+    font-size: 1.1rem !important;
+    font-weight: 600 !important;
+  }
+
+  /* SELECTS / INPUTS DO FILTRO */
+  .filter-select {
+    background: #0f172a !important;
+    color: #f1f5f9 !important;
+    border: 1px solid #1e293b !important;
+    padding: 14px 16px !important;
+    border-radius: 14px !important;
+    font-size: 1.05rem !important;
+    font-weight: 500 !important;
+  }
+
+  .filter-select::placeholder {
+    color: #94a3b8 !important;
+  }
+
+  /* ÍCONE DO SELECT (reduzido) */
+  .filter-icon {
+    width: 16px !important;
+    height: 16px !important;
+    opacity: 0.75 !important;
+  }
+
+  /* ============================
+     ÍCONES 3D - GLASS SOLID COM BRILHO INTERNO
+     ============================ */
+  .icon-3d {
+    width: 60px !important;
+    height: 60px !important;
+    border-radius: 18px !important;
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    opacity: 0.92;
+    backdrop-filter: blur(4px);
+  }
+
+  /* Brilho interno (inner glow) */
+  .icon-3d::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 18px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.25), transparent);
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  /* Glass Solid Verde - Vendas */
+  .icon-3d.icon-green {
+    background: rgba(16, 185, 129, 0.85) !important;
+    border: 2px solid rgba(16, 185, 129, 0.5) !important;
+    box-shadow:
+      0 4px 12px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2),
+      0 0 20px rgba(16, 185, 129, 0.3) !important;
+  }
+
+  /* Glass Solid Vermelho - Gastos */
+  .icon-3d.icon-red {
+    background: rgba(239, 68, 68, 0.85) !important;
+    border: 2px solid rgba(239, 68, 68, 0.5) !important;
+    box-shadow:
+      0 4px 12px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2),
+      0 0 20px rgba(239, 68, 68, 0.3) !important;
+  }
+
+  /* Glass Solid Amarelo - ROI */
+  .icon-3d.icon-yellow {
+    background: rgba(251, 191, 36, 0.85) !important;
+    border: 2px solid rgba(251, 191, 36, 0.5) !important;
+    box-shadow:
+      0 4px 12px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2),
+      0 0 20px rgba(251, 191, 36, 0.3) !important;
+  }
+
+  /* Glass Solid Azul - Leads */
+  .icon-3d.icon-blue {
+    background: rgba(14, 165, 233, 0.85) !important;
+    border: 2px solid rgba(14, 165, 233, 0.5) !important;
+    box-shadow:
+      0 4px 12px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2),
+      0 0 20px rgba(14, 165, 233, 0.3) !important;
+  }
+
+  /* Glass Solid Roxo - Vendas */
+  .icon-3d.icon-purple {
+    background: rgba(168, 85, 247, 0.85) !important;
+    border: 2px solid rgba(168, 85, 247, 0.5) !important;
+    box-shadow:
+      0 4px 12px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2),
+      0 0 20px rgba(168, 85, 247, 0.3) !important;
+  }
+
+  /* Glass Solid Rosa - Taxa Conversão */
+  .icon-3d.icon-pink {
+    background: rgba(236, 72, 153, 0.85) !important;
+    border: 2px solid rgba(236, 72, 153, 0.5) !important;
+    box-shadow:
+      0 4px 12px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2),
+      0 0 20px rgba(236, 72, 153, 0.3) !important;
+  }
+
+  /* Glass Solid Laranja - Custo por Lead */
+  .icon-3d.icon-orange {
+    background: rgba(251, 146, 60, 0.85) !important;
+    border: 2px solid rgba(251, 146, 60, 0.5) !important;
+    box-shadow:
+      0 4px 12px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2),
+      0 0 20px rgba(251, 146, 60, 0.3) !important;
+  }
+
+  /* Glass Solid Ciano - Ticket Médio */
+  .icon-3d.icon-cyan {
+    background: rgba(6, 182, 212, 0.85) !important;
+    border: 2px solid rgba(6, 182, 212, 0.5) !important;
+    box-shadow:
+      0 4px 12px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2),
+      0 0 20px rgba(6, 182, 212, 0.3) !important;
+  }
+
+  /* Animação ao passar o mouse */
+  .icon-3d:hover {
+    transform: translateY(-4px) scale(1.08);
+    opacity: 1;
+  }
+
+  /* Ícone SVG interno - BRANCO com brilho */
+  .icon-3d svg {
+    width: 30px !important;
+    height: 30px !important;
+    color: white !important;
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.3));
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ============================
+     HOVER NAS TABELAS - GLASS EFFECT
+     ============================ */
+  /* Estilo melhorado para hover nas linhas de tabela */
+  table tbody tr:hover {
+    background: linear-gradient(90deg,
+        rgba(59, 130, 246, 0.15),
+        rgba(147, 51, 234, 0.12)) !important;
+    backdrop-filter: blur(8px);
+    border-left: 3px solid rgba(59, 130, 246, 0.6);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+  }
+
+  /* Texto das células com hover mais visível */
+  table tbody tr:hover td {
+    color: rgba(255, 255, 255, 0.95) !important;
+  }
+}
