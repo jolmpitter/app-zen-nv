@@ -34,7 +34,17 @@ export default function LoginPage() {
         toast.error(result?.error || 'Erro ao fazer login');
       } else {
         toast.success('Login realizado com sucesso!');
-        router.push('/dashboard');
+
+        // Buscar a sessão para determinar o redirect correto
+        const response = await fetch('/api/auth/session');
+        const session = await response.json();
+
+        // CIO vai para Enterprise, outros para Dashboard
+        if (session?.user?.role === 'cio') {
+          router.push('/enterprise');
+        } else {
+          router.push('/dashboard');
+        }
         router.refresh();
       }
     } catch (error) {

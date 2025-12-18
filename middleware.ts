@@ -33,5 +33,5 @@ export default withAuth(
 );
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/crm/:path*', '/metricas/:path*', '/importar/:path*', '/analise-semanal/:path*', '/meta-ads/:path*', '/relatorios/:path*', '/usuarios/:path*', '/integracoes/:path*', '/perfil/:path*', '/login', '/signup'],
+  matcher: ['/dashboard/:path*', '/crm/:path*', '/metricas/:path*', '/importar/:path*', '/analise-semanal/:path*', '/meta-ads/:path*', '/relatorios/:path*', '/usuarios/:path*', '/integracoes/:path*', '/perfil/:path*', '/enterprise/:path*', '/controle-acesso/:path*', '/whatsapp/:path*', '/login', '/signup'],
 };
