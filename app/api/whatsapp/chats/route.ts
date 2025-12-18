@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
             },
             include: {
                 messages: {
-                    orderBy: { createdAt: 'desc' },
+                    orderBy: { timestamp: 'desc' },
                     take: 1
                 }
             },
@@ -35,12 +35,12 @@ export async function GET(req: NextRequest) {
         });
 
         // Formatar para o componente de chat
-        const chats = leads.map(lead => ({
+        const chats = leads.map((lead: any) => ({
             id: lead.id,
             name: lead.name,
             lastMessage: lead.messages[0]?.content || 'Sem mensagens ainda',
-            time: lead.messages[0]?.createdAt
-                ? new Date(lead.messages[0].createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            time: lead.messages[0]?.timestamp
+                ? new Date(lead.messages[0].timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                 : new Date(lead.createdAt).toLocaleDateString(),
             unread: 0,
             status: 'online',

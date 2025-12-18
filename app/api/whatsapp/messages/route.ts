@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
 
         const messages = await prisma.message.findMany({
             where: { leadId },
-            orderBy: { createdAt: 'asc' },
+            orderBy: { timestamp: 'asc' },
         });
 
         return NextResponse.json(messages);

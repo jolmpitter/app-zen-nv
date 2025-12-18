@@ -122,7 +122,7 @@ export default function WhatsAppInbox() {
                     id: Date.now().toString(),
                     content: data.content,
                     fromMe: false,
-                    createdAt: new Date(),
+                    timestamp: new Date(),
                     status: 'received'
                 }]);
             }
@@ -153,7 +153,7 @@ export default function WhatsAppInbox() {
             id: tempId,
             content: textToSend,
             fromMe: true,
-            createdAt: new Date(),
+            timestamp: new Date(),
             status: 'sending'
         }]);
 
