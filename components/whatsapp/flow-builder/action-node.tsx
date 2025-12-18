@@ -3,7 +3,9 @@ import { Handle, Position, NodeProps } from '@xyflow/react';
 import { Settings, MoreVertical, Tag, UserPlus, Info } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 
-export const ActionNode = memo(({ data, selected }: NodeProps) => {
+export const ActionNode = memo((props: NodeProps) => {
+    const data = props.data as { actionType?: string; tag?: string; step?: string };
+    const selected = props.selected;
     return (
         <Card className={`w-64 border-white/10 bg-[#1a1a2e]/80 backdrop-blur-xl overflow-hidden transition-all ${selected ? 'ring-2 ring-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.3)]' : ''}`}>
             <div className="p-3 bg-emerald-500/20 border-b border-white/5 flex items-center justify-between">

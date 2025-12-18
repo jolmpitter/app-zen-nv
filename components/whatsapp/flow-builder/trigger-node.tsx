@@ -3,7 +3,9 @@ import { Handle, Position, NodeProps } from '@xyflow/react';
 import { Play, MoreVertical, Zap } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 
-export const TriggerNode = memo(({ data, selected }: NodeProps) => {
+export const TriggerNode = memo((props: NodeProps) => {
+    const data = props.data as { triggerType?: string; keyword?: string };
+    const selected = props.selected;
     return (
         <Card className={`w-64 border-white/10 bg-[#1a1a2e]/80 backdrop-blur-xl overflow-hidden transition-all ${selected ? 'ring-2 ring-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.3)]' : ''}`}>
             <div className="p-3 bg-amber-500/20 border-b border-white/5 flex items-center justify-between">

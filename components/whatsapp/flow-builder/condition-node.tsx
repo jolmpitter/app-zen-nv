@@ -3,7 +3,9 @@ import { Handle, Position, NodeProps } from '@xyflow/react';
 import { Split, MoreVertical, HelpCircle } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 
-export const ConditionNode = memo(({ data, selected }: NodeProps) => {
+export const ConditionNode = memo((props: NodeProps) => {
+    const data = props.data as { conditionType?: string; field?: string; value?: string };
+    const selected = props.selected;
     return (
         <Card className={`w-64 border-white/10 bg-[#1a1a2e]/80 backdrop-blur-xl overflow-hidden transition-all ${selected ? 'ring-2 ring-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.3)]' : ''}`}>
             <div className="p-3 bg-blue-500/20 border-b border-white/5 flex items-center justify-between">
