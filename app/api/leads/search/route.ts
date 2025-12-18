@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
             },
             take: 10,
             include: {
-                user: { select: { name: true } },
+                atendente: { select: { name: true } },
                 funnel: { select: { name: true } },
                 step: { select: { name: true } },
             },
