@@ -39,6 +39,7 @@ import { MonthlyGoalGauge } from '@/components/dashboard/monthly-goal-gauge';
 import { LeadsPipelineTable } from '@/components/dashboard/leads-pipeline-table';
 import { CreativePerformanceRadar } from '@/components/dashboard/creative-performance-radar';
 import { MonthlyGrowthArea } from '@/components/dashboard/monthly-growth-area';
+import { GlobalSearch } from '@/components/dashboard/global-search';
 
 interface MetricsSummary {
   totalGasto: number;
@@ -287,9 +288,16 @@ export default function DashboardPage() {
             Bem-vindo, {session?.user?.name || 'Usuário'}
           </p>
         </div>
-        <Badge variant="outline" className="text-xs sm:text-sm px-3 py-1">
-          {session?.user?.role === 'gerente' ? 'Gerente' : session?.user?.role === 'gestor' ? 'Gestor' : 'Atendente'}
-        </Badge>
+
+        <div className="flex-1 max-w-md hidden md:block">
+          <GlobalSearch />
+        </div>
+
+        <div className="flex items-center gap-3">
+          <Badge variant="outline" className="text-xs sm:text-sm px-3 py-1">
+            {session?.user?.role === 'gerente' ? 'Gerente' : session?.user?.role === 'gestor' ? 'Gestor' : 'Atendente'}
+          </Badge>
+        </div>
       </div>
 
       {/* Filtros - Seção Compacta */}
