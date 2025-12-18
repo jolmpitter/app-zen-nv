@@ -4,37 +4,31 @@
 
 @layer base {
   :root {
-    /* Nova Paleta Moderna - Gestão Polo */
-    --background: 217 33% 17%;
-    /* #1f2937 - Cinza escuro */
-    --foreground: 0 0% 100%;
-    /* Branco para contraste */
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
 
-    --card: 0 0% 100%;
-    /* Branco */
-    --card-foreground: 222.2 47.4% 11.2%;
+    --card: 240 10% 4.9%;
+    --card-foreground: 0 0% 98%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 47.4% 11.2%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
 
-    --primary: 239 84% 58%;
-    /* #4F46E5 - Indigo moderno */
-    --primary-foreground: 0 0% 100%;
+    --primary: 263.4 70% 50.4%;
+    /* Purple */
+    --primary-foreground: 210 40% 98%;
 
-    --secondary: 220 13% 91%;
-    /* #E5E7EB - Gray suave */
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
 
-    --muted: 220 13% 91%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
 
-    --accent: 239 100% 97%;
-    /* #EEF2FF - Indigo claro */
-    --accent-foreground: 239 84% 58%;
+    --accent: 45 93% 47%;
+    /* Gold Accent */
+    --accent-foreground: 0 0% 98%;
 
-    --destructive: 0 84.2% 60.2%;
-    /* #EF4444 */
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
 
     --success: 160 84% 39%;
     /* #10B981 */
@@ -43,13 +37,11 @@
     --info: 199 89% 48%;
     /* #0EA5E9 */
 
-    --border: 220 13% 91%;
-    /* #E5E7EB */
-    --input: 220 13% 91%;
-    --ring: 239 84% 58%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 263.4 70% 50.4%;
 
-    --radius: 0.875rem;
-    /* 14px - Bordas arredondadas modernas */
+    --radius: 0.75rem;
 
     /* Cores de Gráficos Gradientes */
     --chart-1: 239 84% 58%;
@@ -62,47 +54,50 @@
     /* Azul informação */
     --chart-5: 280 81% 60%;
     /* Roxo acento */
+
+    --sidebar-background: 240 10% 8%;
+    --sidebar-foreground: 240 5% 96%;
+    --sidebar-primary: 263.4 70% 50.4%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 5% 96%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 263.4 70% 50.4%;
   }
 
   .dark {
-    --background: 0 0% 0%;
-    /* Preto puro */
-    --foreground: 0 0% 100%;
-    /* Branco puro para contraste máximo */
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
 
-    --card: 0 0% 8%;
-    /* Card muito escuro */
+    --card: 240 10% 6%;
+    /* Slightly lighter for contrast */
     --card-foreground: 0 0% 98%;
 
-    --popover: 0 0% 5%;
+    --popover: 240 10% 3.9%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 45 100% 50%;
-    /* Amarelo vibrante */
-    --primary-foreground: 0 0% 0%;
+    --primary: 263.4 70% 50.4%;
+    --primary-foreground: 210 40% 98%;
 
-    --secondary: 0 0% 15%;
-    /* Cinza muito escuro */
+    --secondary: 240 3.7% 15.9%;
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 60%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
 
-    --accent: 45 90% 20%;
-    /* Amarelo escuro para accent */
-    --accent-foreground: 45 100% 60%;
+    --accent: 45 93% 47%;
+    --accent-foreground: 0 0% 98%;
 
-    --destructive: 0 72% 50%;
+    --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
 
     --success: 160 84% 39%;
     --warning: 38 92% 50%;
     --info: 199 89% 48%;
 
-    --border: 0 0% 20%;
-    /* Border escuro */
-    --input: 0 0% 15%;
-    --ring: 45 100% 50%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 263.4 70% 50.4%;
 
     --chart-1: 45 100% 50%;
     --chart-2: 160 84% 39%;
@@ -115,17 +110,17 @@
 @layer base {
   * {
     @apply border-border;
-    transition: all 0.25s ease;
-    /* Animações suaves globais */
+    transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
   }
 
   body {
-    @apply text-foreground;
-    background: linear-gradient(135deg, #000000 0%, #1a1a00 50%, #000000 100%) !important;
+    @apply bg-background text-foreground;
+    background: radial-gradient(circle at top left, #1a1a2e 0%, #0c0c14 100%);
     background-attachment: fixed;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-weight: 500;
     /* Peso médio por padrão */
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
 
   h1,

@@ -5,22 +5,50 @@ import axios from 'axios';
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const { from, text, instanceId, companyId } = body;
 
-        if (!from || !instanceId || !companyId) {
-            return NextResponse.json({ error: 'Missing parameters' }, { status: 400 });
+        // Formato Evolution API: { event: 'messages.upsert', instance: 'name', data: { ... } }
+        const { event, instance: instanceName, data } = body;
+
+        if (!event || !instanceName || !data) {
+            // Pode ser um teste ou outro formato, vamos logar
+            console.log('[WEBHOOK] Formato desconhecido:', body);
+            return NextResponse.json({ message: 'Payload format not recognized' });
         }
 
-        // 1. Verificar se a instância existe
-        const instance = await prisma.whatsAppInstance.findUnique({
-            where: { id: instanceId },
+        // 1. Verificar se a instância existe no nosso banco (buscando pelo nome sanitizado ou original)
+        // O nome no banco pode estar com espaços, mas na Evolution foi sanitizado
+        const instance = await prisma.whatsAppInstance.findFirst({
+            where: {
+                OR: [
+                    { name: instanceName },
+                    { name: instanceName.replace(/_/g, ' ') }
+                ]
+            },
+            include: { company: true }
         });
 
         if (!instance) {
+            console.error(`[WEBHOOK] Instância não encontrada no banco: ${instanceName}`);
             return NextResponse.json({ error: 'Instance not found' }, { status: 404 });
         }
 
-        // 2. Buscar ou criar o Lead
+        // 2. Processar apenas mensagens recebidas (MESSAGES_UPSERT)
+        if (event !== 'messages.upsert') {
+            return NextResponse.json({ message: 'Event ignored' });
+        }
+
+        const messageData = data.message;
+        const key = data.key;
+
+        if (!messageData || key.fromMe) {
+            return NextResponse.json({ message: 'Outgoing message or empty data ignored' });
+        }
+
+        const from = key.remoteJid.split('@')[0];
+        const text = messageData.conversation || messageData.extendedTextMessage?.text || '';
+        const companyId = instance.companyId;
+
+        // 3. Buscar ou criar o Lead
         let lead = await prisma.lead.findFirst({
             where: {
                 phone: from,
@@ -30,72 +58,77 @@ export async function POST(req: NextRequest) {
 
         if (!lead) {
             // Criar novo lead automaticamente
-            // Buscar o primeiro funil da empresa para colocar o lead no passo 'Novo'
             const funnel = await prisma.funnel.findFirst({
                 where: { companyId },
                 include: { steps: { orderBy: { order: 'asc' } } }
             });
 
-            // Buscar um atendente/gerente padrão para a empresa
             const fallbackUser = await prisma.user.findFirst({
                 where: { companyId, role: { in: ['gerente', 'cio'] } }
             });
 
             if (!fallbackUser) {
-                console.error(`[WEBHOOK] Erro: Nenhum usuário (gerente/cio) encontrado para a empresa ${companyId}`);
+                console.error(`[WEBHOOK] Erro: Nenhum usuário responsável para a empresa ${companyId}`);
                 return NextResponse.json({ error: 'Company owner not found' }, { status: 404 });
             }
 
             lead = await prisma.lead.create({
                 data: {
-                    name: `Novo Lead (${from})`,
+                    name: `Lead WhatsApp (${from})`,
                     phone: from,
                     status: 'novo',
                     source: 'WhatsApp',
                     companyId: companyId,
                     funnelId: funnel?.id,
                     stepId: funnel?.steps[0]?.id,
-                    atendenteId: fallbackUser.id,
-                    gerenteId: fallbackUser.role === 'gerente' ? fallbackUser.id : undefined
+                    atendenteId: fallbackUser.id
                 }
             });
         }
 
-        // 3. Registrar a mensagem
+        // 4. Registrar a mensagem
         await prisma.message.create({
             data: {
-                whatsappId: instanceId,
+                whatsappId: instance.id,
                 leadId: lead.id,
-                content: text || '',
+                content: text || 'Mensagem de mídia ou outro tipo',
                 fromMe: false,
                 type: 'text',
                 status: 'received'
             }
         });
 
-        // 3.1 Notificar servidor de socket para atualização em tempo real
+        // 5. Notificar Socket Server para update em tempo real
         try {
-            await axios.post('http://localhost:3001/emit', {
-                room: `company_${companyId}`,
+            const socketUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+            await axios.post(`${socketUrl}/api/socket/emit`, {
                 event: 'new_message',
                 data: {
                     leadId: lead.id,
-                    content: text || '',
-                    from: from,
+                    from: lead.name,
+                    content: text,
                     timestamp: new Date()
                 }
             });
-        } catch (err: any) {
-            console.error('Socket notification failed:', err.message);
+        } catch (e) {
+            console.error('Socket notification skiped');
         }
 
-        // 4. Registrar no histórico do lead
+        // 6. Processar Fluxos de Automação
+        try {
+            const { FlowProcessor } = await import('@/lib/whatsapp/flow-processor');
+            await FlowProcessor.processMessage(instance.id, lead.id, text);
+        } catch (e) {
+            console.error('Error in flow processing:', e);
+        }
+
+        // 7. Histórico do lead
         await prisma.leadHistory.create({
             data: {
                 leadId: lead.id,
-                userId: lead.atendenteId, // Usa o atendente vinculado ao lead
+                userId: lead.atendenteId,
                 action: 'message_received',
-                description: `Mensagem recebida via WhatsApp: ${text?.substring(0, 50)}${text?.length > 50 ? '...' : ''}`,
+                description: `Mensagem via WhatsApp: ${text?.substring(0, 50)}`,
             }
         });
 

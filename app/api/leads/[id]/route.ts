@@ -93,7 +93,11 @@ export async function PATCH(
     }
 
     const body = await req.json();
-    const { name, email, phone, status, source, valorPotencial, valorFechado, notes } = body;
+    const {
+      name, email, phone, status, source,
+      valorPotencial, valorFechado, notes,
+      tags, funnelId, stepId
+    } = body;
 
     // Preparar dados de atualização
     const updateData: any = {};
@@ -127,6 +131,18 @@ export async function PATCH(
       updateData.notes = notes;
       changes.push(`Notas atualizadas`);
     }
+    if (tags !== undefined && tags !== lead.tags) {
+      updateData.tags = tags;
+      changes.push(`Tags atualizadas`);
+    }
+    if (funnelId !== undefined && funnelId !== lead.funnelId) {
+      updateData.funnelId = funnelId;
+      changes.push(`Funil alterado`);
+    }
+    if (stepId !== undefined && stepId !== lead.stepId) {
+      updateData.stepId = stepId;
+      changes.push(`Etapa alterada`);
+    }
     if (status !== undefined && status !== lead.status) {
       updateData.status = status;
       updateData.closedAt = (status === 'concluido' || status === 'perdido') ? new Date() : null;
@@ -141,6 +157,18 @@ export async function PATCH(
           description: `Status alterado de "${lead.status}" para "${status}"`,
           oldValue: lead.status,
           newValue: status,
+        },
+      });
+    }
+
+    // Criar histórico genérico para outras mudanças
+    if (changes.length > 0 && !(status !== undefined && status !== lead.status && changes.length === 1)) {
+      await prisma.leadHistory.create({
+        data: {
+          leadId: params?.id || '',
+          userId: session.user.id,
+          action: 'update',
+          description: changes.join(', '),
         },
       });
     }

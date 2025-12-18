@@ -35,9 +35,8 @@ export default function LoginPage() {
       } else {
         toast.success('Login realizado com sucesso!');
 
-        // Todos vão para dashboard por enquanto
-        router.push('/dashboard');
-        router.refresh();
+        // Redirecionamento completo para garantir carregamento limpo da sessão
+        window.location.href = '/dashboard';
       }
     } catch (error) {
       console.error('Login error:', error);
@@ -48,23 +47,27 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4">
-      <Card className="w-full max-w-md shadow-lg">
+    <div className="min-h-screen flex items-center justify-center bg-[#0a0a0f] relative overflow-hidden p-4">
+      {/* Elementos decorativos de fundo */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/20 rounded-full blur-[120px] animate-pulse" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-accent/10 rounded-full blur-[120px]" />
+
+      <Card className="w-full max-w-md bg-white/5 border-white/10 backdrop-blur-2xl shadow-2xl relative z-10">
         <CardHeader className="space-y-1">
-          <div className="flex items-center justify-center mb-4">
-            <div className="p-3 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl">
-              <LogIn className="w-8 h-8 text-white" />
+          <div className="flex items-center justify-center mb-6">
+            <div className="p-4 bg-primary/20 rounded-2xl border border-primary/30 shadow-[0_0_30px_rgba(168,85,247,0.2)]">
+              <LogIn className="w-10 h-10 text-primary" />
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold text-center">Bem-vindo</CardTitle>
-          <CardDescription className="text-center">
+          <CardTitle className="text-3xl font-bold text-center text-white tracking-tight">POLODASH</CardTitle>
+          <CardDescription className="text-center text-white/60">
             Entre com suas credenciais para acessar o sistema
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-white/80 font-medium">Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -73,14 +76,15 @@ export default function LoginPage() {
                 onChange={(e) => setFormData({ ...formData, email: e?.target?.value || '' })}
                 required
                 disabled={isLoading}
+                className="bg-white/5 border-white/10 text-white placeholder:text-white/30 h-12 rounded-xl focus:ring-primary focus:border-primary"
               />
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password">Senha</Label>
+                <Label htmlFor="password" className="text-white/80 font-medium">Senha</Label>
                 <Link
                   href="/forgot-password"
-                  className="text-xs text-blue-600 hover:underline font-medium"
+                  className="text-xs text-primary hover:text-primary/80 hover:underline font-semibold"
                 >
                   Esqueceu a senha?
                 </Link>
@@ -93,33 +97,39 @@ export default function LoginPage() {
                 onChange={(e) => setFormData({ ...formData, password: e?.target?.value || '' })}
                 required
                 disabled={isLoading}
+                className="bg-white/5 border-white/10 text-white placeholder:text-white/30 h-12 rounded-xl focus:ring-primary focus:border-primary"
               />
             </div>
           </CardContent>
-          <CardFooter className="flex flex-col space-y-4">
+          <CardFooter className="flex flex-col space-y-6 pt-4">
             <Button
               type="submit"
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              className="w-full h-12 bg-primary hover:bg-primary/90 text-white font-bold rounded-xl shadow-[0_0_20px_rgba(168,85,247,0.3)] transition-all duration-300 hover:scale-[1.02]"
               disabled={isLoading}
             >
               {isLoading ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                   Entrando...
                 </>
               ) : (
-                'Entrar'
+                'Entrar no Sistema'
               )}
             </Button>
-            <div className="text-sm text-center text-muted-foreground">
+            <div className="text-sm text-center text-white/50">
               Não tem uma conta?{' '}
-              <Link href="/signup" className="text-blue-600 hover:underline font-medium">
-                Cadastre-se
+              <Link href="/signup" className="text-primary hover:text-primary/80 hover:underline font-bold">
+                Cadastre-se agora
               </Link>
             </div>
           </CardFooter>
         </form>
       </Card>
+
+      {/* Rodapé sutil */}
+      <div className="absolute bottom-6 text-white/20 text-xs font-medium tracking-widest uppercase">
+        Powered by Zen Company
+      </div>
     </div>
   );
 }

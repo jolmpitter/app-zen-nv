@@ -79,7 +79,8 @@ interface User {
 }
 
 // Nova Paleta Moderna de Cores para Gráficos
-const COLORS = ['#4F46E5', '#10B981', '#F59E0B', '#0EA5E9', '#EF4444', '#8B5CF6', '#EC4899', '#06B6D4'];
+// Nova Paleta Premium de Cores para Gráficos (Roxo, Ouro, Rosa, Ciano)
+const COLORS = ['#8B5CF6', '#F59E0B', '#EC4899', '#06B6D4', '#EF4444', '#10B981', '#4F46E5', '#D946EF'];
 
 export default function DashboardPage() {
   const { data: session } = useSession() || {};
@@ -140,8 +141,8 @@ export default function DashboardPage() {
       const metricsData = await metricsRes.json();
       setMetrics(Array.isArray(metricsData) ? metricsData : []);
 
-      // Buscar usuários (gestores e gerente)
-      if (session?.user?.role === 'gestor' || session?.user?.role === 'gerente') {
+      // Buscar usuários (gestores e gerente) - CIO vê tudo
+      if (session?.user?.role === 'gestor' || session?.user?.role === 'gerente' || session?.user?.role === 'cio') {
         const usersRes = await fetch('/api/users');
         const usersData = await usersRes.json();
         setUsers(Array.isArray(usersData) ? usersData : []);
@@ -303,7 +304,7 @@ export default function DashboardPage() {
       {/* Filtros - Seção Compacta */}
       <AnimatedDiv
         ref={filterRef}
-        className="bg-[#111827] p-5 rounded-[20px] border border-[#1f2937] shadow-[0_4px_24px_rgba(0,0,0,0.45)] transition-all duration-300"
+        className="bg-white/5 backdrop-blur-3xl p-6 rounded-[24px] border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.3)] transition-all duration-500"
         variants={shouldAnimateFilters && !prefersReducedMotion ? fadeInUp : undefined}
         initial="hidden"
         animate="visible"
@@ -321,8 +322,8 @@ export default function DashboardPage() {
             <DateFilter value={dateRange} onChange={setDateRange} />
           </div>
 
-          {/* Filtros de Usuário (apenas para gestores e gerentes) */}
-          {(session?.user?.role === 'gestor' || session?.user?.role === 'gerente') && users?.length > 0 && (
+          {/* Filtros de Usuário (Gestores, Gerentes e CIO Master) */}
+          {(session?.user?.role === 'gestor' || session?.user?.role === 'gerente' || session?.user?.role === 'cio') && users?.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label className="text-gray-200 text-[0.95rem] font-semibold mb-1.5 block">Tipo de Filtro</label>
@@ -380,7 +381,7 @@ export default function DashboardPage() {
         delay={0.1}
       >
         <AnimatedDiv variants={shouldAnimateKpis && !prefersReducedMotion ? staggerItem : undefined}>
-          <Card className="border border-[rgba(255,255,255,0.12)] bg-gradient-to-br from-[rgba(255,255,255,0.06)] to-[rgba(255,255,255,0.02)] backdrop-blur-md hover:shadow-2xl hover:shadow-emerald-500/20 hover:-translate-y-1 hover:scale-[1.02] transition-all duration-300">
+          <Card className="border border-white/10 bg-white/5 backdrop-blur-xl hover:shadow-[0_0_30px_rgba(168,85,247,0.15)] hover:-translate-y-1.5 hover:bg-white/10 transition-all duration-500 rounded-[22px]">
             <CardHeader className="pb-2.5">
               <div className="icon-3d icon-green mb-2.5">
                 <DollarSign strokeWidth={2.5} />
@@ -484,7 +485,7 @@ export default function DashboardPage() {
         </AnimatedDiv>
 
         <AnimatedDiv variants={shouldAnimateKpis && !prefersReducedMotion ? staggerItem : undefined}>
-          <Card className="border border-[rgba(255,255,255,0.12)] bg-gradient-to-br from-[rgba(255,255,255,0.06)] to-[rgba(255,255,255,0.02)] backdrop-blur-md hover:shadow-2xl hover:shadow-emerald-500/20 hover:-translate-y-1 hover:scale-[1.02] transition-all duration-300">
+          <Card className="border border-white/10 bg-white/5 backdrop-blur-xl hover:shadow-[0_0_30px_rgba(168,85,247,0.15)] hover:-translate-y-1.5 hover:bg-white/10 transition-all duration-500 rounded-[22px]">
             <CardHeader className="pb-2.5">
               <div className="icon-3d icon-green mb-2.5">
                 <Sprout strokeWidth={2.5} />

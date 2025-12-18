@@ -97,6 +97,7 @@ model Company {
   objectives      Objective[]
   auditLogs       AuditLog[]
   invitations     Invitation[]
+  automationFlows AutomationFlow[]
 }
 
 model Sector {
@@ -482,4 +483,21 @@ model Invitation {
   @@index([companyId])
   @@index([email])
   @@index([token])
+}
+
+model AutomationFlow {
+  id              String   @id @default(cuid())
+  name            String
+  isActive        Boolean  @default(false)
+  
+  // JSON state of the flow (nodes and edges)
+  flowContext     String?  // JSON string: { nodes: [], edges: [] }
+  
+  companyId       String
+  company         Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([companyId])
 }

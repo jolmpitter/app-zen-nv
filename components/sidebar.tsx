@@ -53,13 +53,19 @@ export function Sidebar() {
       name: 'CRM',
       href: '/crm',
       icon: Users,
-      allowedRoles: ['gerente', 'gestor', 'atendente'],
+      allowedRoles: ['cio', 'gerente', 'gestor', 'atendente'],
     },
     {
       name: 'WhatsApp',
       href: '/whatsapp',
       icon: MessageSquare,
-      allowedRoles: ['gerente', 'gestor', 'atendente'],
+      allowedRoles: ['cio', 'gerente', 'gestor', 'atendente'],
+    },
+    {
+      name: 'Automações',
+      href: '/whatsapp/flows',
+      icon: Zap,
+      allowedRoles: ['cio', 'gerente', 'gestor', 'atendente'],
     },
     {
       name: 'Métricas',
@@ -77,7 +83,7 @@ export function Sidebar() {
       name: 'Análise Semanal',
       href: '/analise-semanal',
       icon: Calendar,
-      allowedRoles: ['gerente', 'gestor', 'atendente'],
+      allowedRoles: ['cio', 'gerente', 'gestor', 'atendente'],
     },
     {
       name: 'Meta Ads',
@@ -113,7 +119,7 @@ export function Sidebar() {
       name: 'Perfil',
       href: '/perfil',
       icon: UserIcon,
-      allowedRoles: ['gerente', 'gestor', 'atendente'],
+      allowedRoles: ['cio', 'gerente', 'gestor', 'atendente'],
     },
   ];
 
@@ -121,42 +127,36 @@ export function Sidebar() {
     await signOut({ callbackUrl: '/login' });
   };
 
-  // Componente de conteúdo do sidebar (reutilizável)
   const SidebarContent = ({ onLinkClick, isMobile = false }: { onLinkClick?: () => void; isMobile?: boolean }) => (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-[#0a0a0f] border-r border-white/5">
       {/* Header */}
-      <div className="p-4 border-b border-white/10">
-        <div className="flex items-center justify-center">
+      <div className="p-6">
+        <div className="flex items-center space-x-3">
+          <div className="bg-primary/20 p-2 rounded-xl border border-primary/30">
+            <Zap className="w-6 h-6 text-primary animate-pulse" />
+          </div>
           {(!collapsed || isMobile) && (
-            <div className="w-full h-16 flex items-center justify-center">
-              <h1 className="text-2xl font-bold text-white tracking-wider font-display">
-                POLODASH
-              </h1>
-            </div>
-          )}
-          {collapsed && !isMobile && (
-            <div className="w-12 h-12 flex items-center justify-center">
-              <span className="text-xl font-bold text-white font-display">
-                PD
-              </span>
-            </div>
+            <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60 tracking-tight">
+              POLODASH
+            </h1>
           )}
         </div>
       </div>
 
       {/* User Info */}
-      <div className="p-4 border-b border-white/10">
+      <div className="px-4 py-6 mx-2 my-2 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
         <div className={cn('flex items-center', (collapsed && !isMobile) ? 'justify-center' : 'space-x-3')}>
           <UserAvatar
             name={session?.user?.name || 'Usuário'}
             userId={session?.user?.id}
             size="md"
+            className="border-2 border-primary/40 ring-4 ring-primary/10"
           />
           {(!collapsed || isMobile) && (
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold truncate">{session?.user?.name || 'Usuário'}</p>
-              <p className="text-xs text-white/70 truncate">
-                {session?.user?.role === 'cio' ? 'CIO' : session?.user?.role === 'gerente' ? 'Gerente' : session?.user?.role === 'gestor' ? 'Gestor' : 'Atendente'}
+              <p className="text-sm font-bold truncate text-white">{session?.user?.name || 'Usuário'}</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-primary">
+                {session?.user?.role === 'cio' ? 'CIO MASTER' : session?.user?.role === 'gerente' ? 'Gerente' : session?.user?.role === 'gestor' ? 'Gestor' : 'Atendente'}
               </p>
             </div>
           )}
@@ -164,7 +164,7 @@ export function Sidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+      <nav className="flex-1 px-3 py-4 space-y-1.5 overflow-y-auto">
         {navigation
           ?.filter((item) => item?.allowedRoles?.includes(session?.user?.role || ''))
           ?.map((item) => {
@@ -177,24 +177,32 @@ export function Sidebar() {
                 href={item?.href || '#'}
                 onClick={onLinkClick}
                 className={cn(
-                  'flex items-center px-3 py-3 rounded-xl transition-all duration-300 group',
+                  'flex items-center px-4 py-3 rounded-xl transition-all duration-300 group relative',
                   (collapsed && !isMobile) ? 'justify-center' : 'space-x-3',
                   isActive
-                    ? 'bg-white/25 shadow-xl backdrop-blur-sm font-semibold'
-                    : 'hover:bg-white/15 hover:shadow-lg hover:translate-x-1'
+                    ? 'bg-primary/15 text-primary border border-primary/20 shadow-[0_0_20px_rgba(168,85,247,0.1)]'
+                    : 'text-white/60 hover:text-white hover:bg-white/5'
                 )}
               >
-                <div className="relative flex items-center justify-center w-10 h-10 rounded-lg bg-white/10 backdrop-blur-md shadow-lg transition-all duration-300 group-hover:-translate-y-1.5 group-hover:scale-110 group-hover:shadow-2xl group-hover:bg-white/20">
-                  <Icon className="w-5 h-5 flex-shrink-0" />
-                </div>
-                {(!collapsed || isMobile) && <span className="font-medium">{item?.name}</span>}
+                {isActive && (
+                  <div className="absolute left-0 w-1 h-6 bg-primary rounded-full" />
+                )}
+                <Icon className={cn(
+                  "w-5 h-5 transition-transform duration-300 group-hover:scale-110",
+                  isActive ? "text-primary" : "text-white/60"
+                )} />
+                {(!collapsed || isMobile) && (
+                  <span className="text-sm font-medium tracking-wide">
+                    {item?.name}
+                  </span>
+                )}
               </Link>
             );
           })}
       </nav>
 
       {/* Footer */}
-      <div className="p-4 space-y-2 border-t border-white/10">
+      <div className="p-4 space-y-2 border-t border-white/5">
         <Button
           onClick={() => {
             handleLogout();
@@ -202,18 +210,18 @@ export function Sidebar() {
           }}
           variant="ghost"
           className={cn(
-            'w-full text-white hover:bg-white/15 hover:text-white hover:shadow-lg hover:scale-105 transition-all duration-300 rounded-xl',
-            (collapsed && !isMobile) ? 'px-0' : 'justify-start'
+            'w-full text-white/60 hover:bg-red-500/10 hover:text-red-500 transition-all duration-300 rounded-xl px-4',
+            (collapsed && !isMobile) ? 'justify-center' : 'justify-start'
           )}
         >
           <LogOut className="w-5 h-5" />
-          {(!collapsed || isMobile) && <span className="ml-3">Sair</span>}
+          {(!collapsed || isMobile) && <span className="ml-3 text-sm font-medium">Sair</span>}
         </Button>
 
         {!isMobile && (
           <button
             onClick={() => setCollapsed(!collapsed)}
-            className="w-full p-2 rounded-xl hover:bg-white/15 hover:shadow-lg hover:scale-105 transition-all duration-300 flex items-center justify-center"
+            className="w-full py-2.5 rounded-xl hover:bg-white/5 transition-all duration-300 flex items-center justify-center text-white/40 hover:text-white"
           >
             {collapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
           </button>
@@ -227,7 +235,7 @@ export function Sidebar() {
       {/* Botão Hamburguer Mobile */}
       <button
         onClick={() => setMobileOpen(true)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-xl bg-gradient-to-br from-emerald-900 via-emerald-950 to-black text-white shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300"
+        className="lg:hidden fixed top-4 left-4 z-50 p-2.5 rounded-xl bg-[#0a0a0f] text-white shadow-2xl border border-white/10 hover:scale-105 transition-all duration-300"
         aria-label="Abrir menu"
       >
         <Menu className="w-6 h-6" />
@@ -237,7 +245,7 @@ export function Sidebar() {
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
         <SheetContent
           side="left"
-          className="w-64 p-0 bg-gradient-to-br from-emerald-900 via-emerald-950 to-black text-white border-none"
+          className="w-72 p-0 bg-[#0a0a0f] text-white border-none shadow-[20px_0_50px_rgba(0,0,0,0.5)]"
         >
           <SidebarContent onLinkClick={() => setMobileOpen(false)} isMobile={true} />
         </SheetContent>
@@ -246,8 +254,8 @@ export function Sidebar() {
       {/* Sidebar Desktop */}
       <aside
         className={cn(
-          'hidden lg:fixed lg:block left-0 top-0 h-screen bg-gradient-to-br from-emerald-900 via-emerald-950 to-black text-white transition-all duration-300 z-50 shadow-2xl',
-          collapsed ? 'w-20' : 'w-64'
+          'hidden lg:fixed lg:block left-0 top-0 h-screen bg-[#0a0a0f] text-white transition-all duration-500 z-50 border-r border-white/5',
+          collapsed ? 'w-20' : 'w-72'
         )}
       >
         <SidebarContent />
