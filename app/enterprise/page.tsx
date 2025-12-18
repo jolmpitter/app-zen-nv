@@ -18,12 +18,19 @@ export default function EnterpriseManagement() {
     const { data: session } = useSession() || {};
     const [logs, setLogs] = useState<any[]>([]);
     const [invites, setInvites] = useState<any[]>([]);
+    const [allUsers, setAllUsers] = useState<any[]>([]);
+    const [allCompanies, setAllCompanies] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [inviteEmail, setInviteEmail] = useState('');
 
+    const isCIO = session?.user?.role === 'cio';
+
     useEffect(() => {
         fetchData();
-    }, []);
+        if (isCIO) {
+            fetchCIOData();
+        }
+    }, [isCIO]);
 
     const fetchData = async () => {
         setLoading(true);
@@ -43,6 +50,53 @@ export default function EnterpriseManagement() {
         }
     };
 
+    const fetchCIOData = async () => {
+        try {
+            const [usersRes, companiesRes] = await Promise.all([
+                fetch('/api/enterprise/users'),
+                fetch('/api/enterprise/companies')
+            ]);
+            const usersData = await usersRes.json();
+            const companiesData = await companiesRes.json();
+            setAllUsers(Array.isArray(usersData) ? usersData : []);
+            setAllCompanies(Array.isArray(companiesData) ? companiesData : []);
+        } catch (err) {
+            console.error('Erro ao carregar dados de CIO');
+        }
+    };
+
+    const handleUpdateUser = async (userId: string, data: any) => {
+        try {
+            const res = await fetch(`/api/enterprise/users/${userId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            if (res.ok) {
+                toast.success('Usuário atualizado!');
+                fetchCIOData();
+            }
+        } catch (err) {
+            toast.error('Erro ao atualizar usuário');
+        }
+    };
+
+    const handleUpdateCompany = async (companyId: string, data: any) => {
+        try {
+            const res = await fetch(`/api/enterprise/companies/${companyId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            if (res.ok) {
+                toast.success('Empresa atualizada!');
+                fetchCIOData();
+            }
+        } catch (err) {
+            toast.error('Erro ao atualizar empresa');
+        }
+    };
+
     const handleCreateInvite = async () => {
         if (!inviteEmail) return;
         try {
@@ -56,10 +110,10 @@ export default function EnterpriseManagement() {
                 toast.success('Convite gerado com sucesso!');
                 setInviteEmail('');
                 fetchData();
-                // Em um app real, aqui enviaríamos o email
-                console.log('Link de convite:', data.inviteLink);
-                navigator.clipboard.writeText(data.inviteLink);
-                toast.success('Link copiado para a área de transferência');
+                if (typeof window !== 'undefined' && navigator.clipboard) {
+                    navigator.clipboard.writeText(data.inviteLink);
+                    toast.success('Link copiado para a área de transferência');
+                }
             }
         } catch (err) {
             toast.error('Erro ao gerar convite');
@@ -95,10 +149,105 @@ export default function EnterpriseManagement() {
                     <TabsTrigger value="audit" className="flex gap-2">
                         <History className="w-4 h-4" /> Auditoria
                     </TabsTrigger>
+                    {isCIO && (
+                        <>
+                            <TabsTrigger value="users" className="flex gap-2">
+                                <ShieldCheck className="w-4 h-4" /> Usuários (CIO)
+                            </TabsTrigger>
+                            <TabsTrigger value="companies" className="flex gap-2">
+                                <ShieldCheck className="w-4 h-4" /> Empresas (CIO)
+                            </TabsTrigger>
+                        </>
+                    )}
                     <TabsTrigger value="invitations" className="flex gap-2">
                         <UserPlus className="w-4 h-4" /> Convites Pro
                     </TabsTrigger>
                 </TabsList>
+
+                {isCIO && (
+                    <>
+                        <TabsContent value="users" className="mt-6">
+                            <Card className="bg-card/50 backdrop-blur-sm border-border">
+                                <CardHeader>
+                                    <CardTitle>Gestão de Usuários</CardTitle>
+                                    <CardDescription>Gerencie todos os acessos do sistema.</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="space-y-4">
+                                        {allUsers.map((user) => (
+                                            <div key={user.id} className="flex items-center justify-between p-4 rounded-lg bg-secondary/20 border border-border/50">
+                                                <div className="flex-1">
+                                                    <p className="font-bold text-lg">{user.name} <Badge variant="outline">{user.role.toUpperCase()}</Badge></p>
+                                                    <p className="text-sm text-muted-foreground">{user.email}</p>
+                                                    <p className="text-xs text-primary">Empresa: {user.company?.name || 'Sem Empresa'}</p>
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <select
+                                                        className="bg-background border rounded px-2 py-1 text-sm"
+                                                        value={user.status}
+                                                        onChange={(e) => handleUpdateUser(user.id, { status: e.target.value })}
+                                                    >
+                                                        <option value="ATIVO">Ativo</option>
+                                                        <option value="BLOQUEADO">Bloqueado</option>
+                                                        <option value="PENDIENTE">Pendente</option>
+                                                    </select>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="text-red-500 hover:text-red-700"
+                                                        onClick={() => handleUpdateUser(user.id, { status: 'BLOQUEADO' })}
+                                                    >
+                                                        Bloquear
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
+
+                        <TabsContent value="companies" className="mt-6">
+                            <Card className="bg-card/50 backdrop-blur-sm border-border">
+                                <CardHeader>
+                                    <CardTitle>Gestão de Empresas & Limites</CardTitle>
+                                    <CardDescription>Defina limites de assentos e controle o status das empresas.</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="space-y-4">
+                                        {allCompanies.map((company) => (
+                                            <div key={company.id} className="flex items-center justify-between p-4 rounded-lg bg-secondary/20 border border-border/50">
+                                                <div className="flex-1">
+                                                    <p className="font-bold text-lg">{company.name}</p>
+                                                    <p className="text-sm text-muted-foreground">Usuários: {company._count.users} / Limite: {company.userLimit}</p>
+                                                </div>
+                                                <div className="flex items-center gap-4">
+                                                    <div className="flex flex-col gap-1">
+                                                        <label className="text-[10px] uppercase font-bold text-muted-foreground">Limite de Seats</label>
+                                                        <input
+                                                            type="number"
+                                                            className="w-20 bg-background border rounded px-2 py-1 text-sm text-center"
+                                                            defaultValue={company.userLimit}
+                                                            onBlur={(e) => handleUpdateCompany(company.id, { userLimit: e.target.value })}
+                                                        />
+                                                    </div>
+                                                    <select
+                                                        className="bg-background border rounded px-2 py-1 text-sm mt-4"
+                                                        value={company.status}
+                                                        onChange={(e) => handleUpdateCompany(company.id, { status: e.target.value })}
+                                                    >
+                                                        <option value="ACTIVE">Ativa</option>
+                                                        <option value="SUSPENDED">Suspensa</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
+                    </>
+                )}
 
                 <TabsContent value="audit" className="mt-6">
                     <Card className="bg-card/50 backdrop-blur-sm border-border">
@@ -121,7 +270,7 @@ export default function EnterpriseManagement() {
                                                 <p className="text-xs text-muted-foreground">{new Date(log.createdAt).toLocaleString()}</p>
                                                 {log.details && (
                                                     <pre className="text-[10px] mt-2 p-2 bg-black/20 rounded overflow-x-auto max-w-md">
-                                                        {JSON.stringify(JSON.parse(log.details), null, 2)}
+                                                        {log.details.startsWith('{') ? JSON.stringify(JSON.parse(log.details), null, 2) : log.details}
                                                     </pre>
                                                 )}
                                             </div>

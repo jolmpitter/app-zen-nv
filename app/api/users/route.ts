@@ -78,24 +78,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Gerente não identificado para esta equipe' }, { status: 400 });
     }
 
-    // Validar Limites da Equipe (Se não for CIO)
-    if (session.user.role !== 'cio') {
-      const teamUsers = await prisma.user.findMany({
-        where: { gerenteId: currentGerenteId }
+    // Validar Limites da Equipe/Empresa (Se não for CIO)
+    if (session.user.role !== 'cio' && session.user.companyId) {
+      const company = await prisma.company.findUnique({
+        where: { id: session.user.companyId },
+        include: { _count: { select: { users: true } } }
       });
 
-      if (role === 'gestor') {
-        const gestoresCount = teamUsers.filter(u => u.role === 'gestor').length;
-        if (gestoresCount >= 2) {
-          return NextResponse.json({ error: 'Limite de 2 Gestores por equipe atingido.' }, { status: 400 });
-        }
-      }
-
-      if (role === 'atendente') {
-        const atendentesCount = teamUsers.filter(u => u.role === 'atendente').length;
-        if (atendentesCount >= 4) {
-          return NextResponse.json({ error: 'Limite de 4 Atendentes por equipe atingido.' }, { status: 400 });
-        }
+      if (company && company.userLimit > 0 && company._count.users >= company.userLimit) {
+        return NextResponse.json({
+          error: `Limite de usuários da empresa atingido (${company.userLimit}).`
+        }, { status: 400 });
       }
     }
 
@@ -115,6 +108,7 @@ export async function POST(req: NextRequest) {
         role,
         status: 'ATIVO', // Criado manualmente pelo gerente/gestor já nasce ativo
         gerenteId: currentGerenteId,
+        companyId: session.user.companyId,
         gestorId: role === 'atendente' && gestorId ? gestorId : null,
       },
       select: {

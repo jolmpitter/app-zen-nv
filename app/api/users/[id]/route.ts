@@ -13,13 +13,13 @@ export async function PATCH(
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session?.user || (session.user.role !== 'gestor' && session.user.role !== 'gerente')) {
+    if (!session?.user || !['cio', 'gerente', 'gestor'].includes(session.user.role)) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
     const userId = params.id;
     const body = await req.json();
-    const { name, email, password, role, gestorId } = body;
+    const { name, email, password, role, gestorId, status } = body;
 
     // Validações
     if (!name || !email || !role) {
@@ -29,7 +29,7 @@ export async function PATCH(
       );
     }
 
-    if (!['gestor', 'atendente'].includes(role)) {
+    if (role && !['cio', 'gerente', 'gestor', 'atendente'].includes(role)) {
       return NextResponse.json(
         { error: 'Role inválido' },
         { status: 400 }
@@ -64,10 +64,11 @@ export async function PATCH(
 
     // Preparar dados para atualização
     const updateData: any = {
-      name,
-      email,
-      role,
-      gestorId: role === 'atendente' && gestorId ? gestorId : null,
+      name: name || undefined,
+      email: email || undefined,
+      role: role || undefined,
+      status: status || undefined,
+      gestorId: role === 'atendente' && gestorId ? (gestorId === 'none' ? null : gestorId) : undefined,
     };
 
     // Se senha foi fornecida, fazer hash
@@ -112,9 +113,9 @@ export async function DELETE(
   try {
     const session = await getServerSession(authOptions);
 
-    // Apenas gerente pode excluir usuários
-    if (!session?.user || session.user.role !== 'gerente') {
-      return NextResponse.json({ error: 'Não autorizado. Apenas gerentes podem excluir usuários.' }, { status: 401 });
+    // Apenas gerente ou CIO pode excluir usuários
+    if (!session?.user || (session.user.role !== 'gerente' && session.user.role !== 'cio')) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
     const userId = params.id;

@@ -12,6 +12,18 @@ export async function POST(req: NextRequest) {
         }
 
         const { email, role } = await req.json();
+
+        // Verificar limite de usuários da empresa (exceto CIO HQ)
+        const company = await prisma.company.findUnique({
+            where: { id: session.user.companyId },
+            include: { _count: { select: { users: true } } }
+        });
+
+        if (company && company.userLimit > 0 && company._count.users >= company.userLimit) {
+            return NextResponse.json({
+                error: `Limite de usuários atingido (${company.userLimit}). Aumente o plano para adicionar mais.`
+            }, { status: 403 });
+        }
         const token = uuidv4();
         const expiresAt = new Date();
         expiresAt.setDate(expiresAt.getDate() + 7); // Expira em 7 dias

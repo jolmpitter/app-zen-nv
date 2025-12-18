@@ -78,6 +78,10 @@ model Company {
   logoUrl         String?
   themeSettings   String?  // JSON string: { primaryColor, secondaryColor, font, etc }
   status          String   @default("ACTIVE") // ACTIVE, SUSPENDED
+  
+  // Limites Enterprise
+  userLimit       Int      @default(5)     // Limite de usuários que podem ser criados nesta empresa
+  
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 

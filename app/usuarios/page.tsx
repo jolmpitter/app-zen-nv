@@ -108,13 +108,13 @@ export default function UsuariosPage() {
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/login');
-    } else if (status === 'authenticated' && session?.user?.role !== 'gestor' && session?.user?.role !== 'gerente') {
+    } else if (status === 'authenticated' && session?.user?.role !== 'gestor' && session?.user?.role !== 'gerente' && session?.user?.role !== 'cio') {
       router.push('/dashboard');
     }
   }, [status, session, router]);
 
   useEffect(() => {
-    if (session?.user?.role === 'gestor' || session?.user?.role === 'gerente') {
+    if (session?.user?.role === 'gestor' || session?.user?.role === 'gerente' || session?.user?.role === 'cio') {
       fetchUsers();
     }
   }, [session]);
@@ -262,7 +262,7 @@ export default function UsuariosPage() {
     );
   }
 
-  if (session?.user?.role !== 'gestor' && session?.user?.role !== 'gerente') {
+  if (session?.user?.role !== 'gestor' && session?.user?.role !== 'gerente' && session?.user?.role !== 'cio') {
     return null;
   }
 
