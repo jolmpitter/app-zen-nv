@@ -5,7 +5,7 @@ export class FlowProcessor {
     static async processMessage(instanceId: string, leadId: string, content: string) {
         try {
             // 1. Buscar a instância para pegar o companyId
-            const instance = await prisma.whatsappInstance.findUnique({
+            const instance = await prisma.whatsAppInstance.findUnique({
                 where: { id: instanceId },
                 include: { company: true }
             });
