@@ -128,7 +128,7 @@ export function Sidebar() {
   };
 
   const SidebarContent = ({ onLinkClick, isMobile = false }: { onLinkClick?: () => void; isMobile?: boolean }) => (
-    <div className="flex flex-col h-full bg-[#0a0a0f] border-r border-white/5">
+    <div className="flex flex-col h-full border-r border-white/5 bg-transparent">
       {/* Header */}
       <div className="p-6">
         <div className="flex items-center space-x-3">
@@ -254,7 +254,8 @@ export function Sidebar() {
       {/* Sidebar Desktop */}
       <aside
         className={cn(
-          'hidden lg:fixed lg:block left-0 top-0 h-screen bg-[#0a0a0f] text-white transition-all duration-500 z-50 border-r border-white/5',
+          'hidden lg:fixed lg:block left-0 top-0 h-screen transition-all duration-500 z-50 border-r border-white/10',
+          'bg-black/40 backdrop-blur-xl',
           collapsed ? 'w-20' : 'w-72'
         )}
       >

@@ -4,345 +4,130 @@
 
 @layer base {
   :root {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
+    /* Base Colors - Deep Dark Theme Default */
+    --background: 260 30% 6%; /* Deep Purple/Black */
+    --foreground: 210 40% 98%;
 
-    --card: 240 10% 4.9%;
-    --card-foreground: 0 0% 98%;
+    --card: 260 25% 10%;
+    --card-foreground: 210 40% 98%;
 
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 260 30% 8%;
+    --popover-foreground: 210 40% 98%;
 
-    --primary: 263.4 70% 50.4%;
-    /* Purple */
+    /* Premium Purple Primary */
+    --primary: 270 70% 60%; /* #a855f7 */
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 260 20% 15%;
+    --secondary-foreground: 210 40% 98%;
 
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
+    --muted: 260 20% 15%;
+    --muted-foreground: 260 10% 65%;
 
-    --accent: 45 93% 47%;
-    /* Gold Accent */
-    --accent-foreground: 0 0% 98%;
+    --accent: 45 93% 47%; /* Gold */
+    --accent-foreground: 210 40% 98%;
 
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive-foreground: 210 40% 98%;
 
-    --success: 160 84% 39%;
-    /* #10B981 */
-    --warning: 38 92% 50%;
-    /* #F59E0B */
-    --info: 199 89% 48%;
-    /* #0EA5E9 */
+    --border: 260 20% 15%;
+    --input: 260 20% 15%;
+    --ring: 270 70% 60%;
 
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 263.4 70% 50.4%;
-
-    --radius: 0.75rem;
-
-    /* Cores de Gráficos Gradientes */
-    --chart-1: 239 84% 58%;
-    /* Indigo primário */
-    --chart-2: 160 84% 39%;
-    /* Verde sucesso */
-    --chart-3: 38 92% 50%;
-    /* Amarelo atenção */
-    --chart-4: 199 89% 48%;
-    /* Azul informação */
-    --chart-5: 280 81% 60%;
-    /* Roxo acento */
-
-    --sidebar-background: 240 10% 8%;
-    --sidebar-foreground: 240 5% 96%;
-    --sidebar-primary: 263.4 70% 50.4%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 5% 96%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 263.4 70% 50.4%;
+    --radius: 1rem;
+    
+    /* Chart Colors - Neon/Bright */
+    --chart-1: 270 70% 60%; /* Purple */
+    --chart-2: 170 80% 50%; /* Teal/Cyan */
+    --chart-3: 45 90% 50%;  /* Gold */
+    --chart-4: 330 80% 60%; /* Pink */
+    --chart-5: 220 80% 60%; /* Blue */
   }
 
   .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-
-    --card: 240 10% 6%;
-    /* Slightly lighter for contrast */
-    --card-foreground: 0 0% 98%;
-
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-
-    --primary: 263.4 70% 50.4%;
+    /* Ensure dark mode matches root in this specific design */
+    --background: 260 30% 6%;
+    --foreground: 210 40% 98%;
+    --card: 260 25% 10%;
+    --card-foreground: 210 40% 98%;
+    --popover: 260 30% 8%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 270 70% 60%;
     --primary-foreground: 210 40% 98%;
-
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-
+    --secondary: 260 20% 15%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 260 20% 15%;
+    --muted-foreground: 260 10% 65%;
     --accent: 45 93% 47%;
-    --accent-foreground: 0 0% 98%;
-
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-
-    --success: 160 84% 39%;
-    --warning: 38 92% 50%;
-    --info: 199 89% 48%;
-
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 263.4 70% 50.4%;
-
-    --chart-1: 45 100% 50%;
-    --chart-2: 160 84% 39%;
-    --chart-3: 38 92% 50%;
-    --chart-4: 199 89% 48%;
-    --chart-5: 280 81% 60%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 260 20% 15%;
+    --input: 260 20% 15%;
+    --ring: 270 70% 60%;
   }
 }
 
 @layer base {
   * {
     @apply border-border;
-    transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
   }
-
   body {
     @apply bg-background text-foreground;
-    background: radial-gradient(circle at top left, #1a1a2e 0%, #0c0c14 100%);
+    /* Deep Cosmic Gradient Background */
+    background: radial-gradient(at 0% 0%, rgba(50, 20, 80, 0.4) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(20, 20, 60, 0.4) 0px, transparent 50%),
+                #080412; /* Deep background color */
     background-attachment: fixed;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-weight: 500;
-    /* Peso médio por padrão */
     font-feature-settings: "rlig" 1, "calt" 1;
-  }
-
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    font-weight: 600;
-    /* Peso semibold para títulos */
   }
 }
 
-/* Sombra leve para cards */
 @layer components {
-  .card-shadow {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  /* GLASSMORPHISM CARD PREMIUM */
+  .glass-card {
+    @apply relative overflow-hidden transition-all duration-300;
+    background: rgba(255, 255, 255, 0.03); /* Very subtle fill */
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
   }
 
-  .card-shadow-hover:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  .glass-card:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
     transform: translateY(-2px);
   }
 
-  /* ============================
-     MELHORIAS VISUAIS DO DASHBOARD
-     ============================ */
-
-  /* CARD/SECTION DE FILTROS */
-  .filter-card {
-    background: #111827 !important;
-    padding: 32px !important;
-    border-radius: 20px !important;
-    border: 1px solid #1f2937 !important;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.45) !important;
-    transition: 0.3s ease;
+  /* NEON GLOW EFFECTS */
+  .glow-text {
+    text-shadow: 0 0 20px rgba(168, 85, 247, 0.5); /* Primary glow */
   }
 
-  /* TÍTULO Filtros */
-  .filter-card h2 {
-    color: #f9fafb !important;
-    font-size: 1.8rem !important;
-    font-weight: 800 !important;
-    letter-spacing: -0.5px;
+  .glow-box {
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.2);
   }
 
-  /* Subtítulo explicativo */
-  .filter-card .subtitle {
-    color: #cbd5e1 !important;
-    font-size: 1.05rem !important;
-    margin-bottom: 22px !important;
-    line-height: 1.45;
+  /* ICON BOXES */
+  .icon-box {
+    @apply flex items-center justify-center rounded-xl transition-all duration-300;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .icon-box:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(1.05);
   }
 
-  /* LABELS (Período / Tipo de Filtro / Atendente) */
-  .filter-label {
-    color: #e2e8f0 !important;
-    font-size: 1.1rem !important;
-    font-weight: 600 !important;
+  /* SIDEBAR ITEM */
+  .sidebar-item {
+    @apply flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-muted-foreground hover:text-white hover:bg-white/5;
   }
 
-  /* SELECTS / INPUTS DO FILTRO */
-  .filter-select {
-    background: #0f172a !important;
-    color: #f1f5f9 !important;
-    border: 1px solid #1e293b !important;
-    padding: 14px 16px !important;
-    border-radius: 14px !important;
-    font-size: 1.05rem !important;
-    font-weight: 500 !important;
-  }
-
-  .filter-select::placeholder {
-    color: #94a3b8 !important;
-  }
-
-  /* ÍCONE DO SELECT (reduzido) */
-  .filter-icon {
-    width: 16px !important;
-    height: 16px !important;
-    opacity: 0.75 !important;
-  }
-
-  /* ============================
-     ÍCONES 3D - GLASS SOLID COM BRILHO INTERNO
-     ============================ */
-  .icon-3d {
-    width: 60px !important;
-    height: 60px !important;
-    border-radius: 18px !important;
-    display: flex !important;
-    justify-content: center;
-    align-items: center;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    opacity: 0.92;
-    backdrop-filter: blur(4px);
-  }
-
-  /* Brilho interno (inner glow) */
-  .icon-3d::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: 18px;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.25), transparent);
-    opacity: 0.4;
-    pointer-events: none;
-  }
-
-  /* Glass Solid Verde - Vendas */
-  .icon-3d.icon-green {
-    background: rgba(16, 185, 129, 0.85) !important;
-    border: 2px solid rgba(16, 185, 129, 0.5) !important;
-    box-shadow:
-      0 4px 12px rgba(0, 0, 0, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.2),
-      0 0 20px rgba(16, 185, 129, 0.3) !important;
-  }
-
-  /* Glass Solid Vermelho - Gastos */
-  .icon-3d.icon-red {
-    background: rgba(239, 68, 68, 0.85) !important;
-    border: 2px solid rgba(239, 68, 68, 0.5) !important;
-    box-shadow:
-      0 4px 12px rgba(0, 0, 0, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.2),
-      0 0 20px rgba(239, 68, 68, 0.3) !important;
-  }
-
-  /* Glass Solid Amarelo - ROI */
-  .icon-3d.icon-yellow {
-    background: rgba(251, 191, 36, 0.85) !important;
-    border: 2px solid rgba(251, 191, 36, 0.5) !important;
-    box-shadow:
-      0 4px 12px rgba(0, 0, 0, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.2),
-      0 0 20px rgba(251, 191, 36, 0.3) !important;
-  }
-
-  /* Glass Solid Azul - Leads */
-  .icon-3d.icon-blue {
-    background: rgba(14, 165, 233, 0.85) !important;
-    border: 2px solid rgba(14, 165, 233, 0.5) !important;
-    box-shadow:
-      0 4px 12px rgba(0, 0, 0, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.2),
-      0 0 20px rgba(14, 165, 233, 0.3) !important;
-  }
-
-  /* Glass Solid Roxo - Vendas */
-  .icon-3d.icon-purple {
-    background: rgba(168, 85, 247, 0.85) !important;
-    border: 2px solid rgba(168, 85, 247, 0.5) !important;
-    box-shadow:
-      0 4px 12px rgba(0, 0, 0, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.2),
-      0 0 20px rgba(168, 85, 247, 0.3) !important;
-  }
-
-  /* Glass Solid Rosa - Taxa Conversão */
-  .icon-3d.icon-pink {
-    background: rgba(236, 72, 153, 0.85) !important;
-    border: 2px solid rgba(236, 72, 153, 0.5) !important;
-    box-shadow:
-      0 4px 12px rgba(0, 0, 0, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.2),
-      0 0 20px rgba(236, 72, 153, 0.3) !important;
-  }
-
-  /* Glass Solid Laranja - Custo por Lead */
-  .icon-3d.icon-orange {
-    background: rgba(251, 146, 60, 0.85) !important;
-    border: 2px solid rgba(251, 146, 60, 0.5) !important;
-    box-shadow:
-      0 4px 12px rgba(0, 0, 0, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.2),
-      0 0 20px rgba(251, 146, 60, 0.3) !important;
-  }
-
-  /* Glass Solid Ciano - Ticket Médio */
-  .icon-3d.icon-cyan {
-    background: rgba(6, 182, 212, 0.85) !important;
-    border: 2px solid rgba(6, 182, 212, 0.5) !important;
-    box-shadow:
-      0 4px 12px rgba(0, 0, 0, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.2),
-      0 0 20px rgba(6, 182, 212, 0.3) !important;
-  }
-
-  /* Animação ao passar o mouse */
-  .icon-3d:hover {
-    transform: translateY(-4px) scale(1.08);
-    opacity: 1;
-  }
-
-  /* Ícone SVG interno - BRANCO com brilho */
-  .icon-3d svg {
-    width: 30px !important;
-    height: 30px !important;
-    color: white !important;
-    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.3));
-    position: relative;
-    z-index: 1;
-  }
-
-  /* ============================
-     HOVER NAS TABELAS - GLASS EFFECT
-     ============================ */
-  /* Estilo melhorado para hover nas linhas de tabela */
-  table tbody tr:hover {
-    background: linear-gradient(90deg,
-        rgba(59, 130, 246, 0.15),
-        rgba(147, 51, 234, 0.12)) !important;
-    backdrop-filter: blur(8px);
-    border-left: 3px solid rgba(59, 130, 246, 0.6);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
-  }
-
-  /* Texto das células com hover mais visível */
-  table tbody tr:hover td {
-    color: rgba(255, 255, 255, 0.95) !important;
+  .sidebar-item.active {
+    @apply bg-primary/20 text-primary font-semibold;
+    box-shadow: inset 3px 0 0 0 currentColor; /* Left activity bar */
   }
 }

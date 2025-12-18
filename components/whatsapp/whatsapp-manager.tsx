@@ -81,29 +81,32 @@ export function WhatsAppManager() {
                     <h2 className="text-2xl font-bold text-white">Canais do WhatsApp</h2>
                     <p className="text-white/40">Gerencie suas conexões via Evolution API ou WhatsApp Business.</p>
                 </div>
-                <Button onClick={createInstance} className="bg-primary hover:bg-primary/90 text-white font-bold rounded-xl shadow-[0_0_20px_rgba(168,85,247,0.3)] transition-all">
-                    <Plus className="w-4 h-4 mr-2" />
+                <Button onClick={createInstance} className="bg-primary hover:bg-primary/90 text-white font-bold rounded-xl shadow-[0_0_20px_rgba(168,85,247,0.4)] hover:shadow-[0_0_30px_rgba(168,85,247,0.6)] transition-all">
+                    <Plus className="w-5 h-5 mr-2" />
                     Nova Conexão
                 </Button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {instances.map((instance) => (
-                    <Card key={instance.id} className="overflow-hidden border-white/10 bg-white/5 backdrop-blur-xl hover:bg-white/10 transition-all group">
+                    <Card key={instance.id} className="glass-card group hover:border-primary/50 cursor-pointer transition-all duration-300">
                         <CardHeader className="pb-4">
                             <div className="flex justify-between items-start">
                                 <div>
-                                    <CardTitle className="text-lg font-bold text-white uppercase tracking-tight">{instance.name}</CardTitle>
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <div className={`w-2 h-2 rounded-full ${instance.status === 'CONNECTED' ? 'bg-green-500 shadow-[0_0_10px_#22c55e]' : 'bg-red-500'}`} />
+                                        <CardTitle className="text-lg font-bold text-white uppercase tracking-tight">{instance.name}</CardTitle>
+                                    </div>
                                     <CardDescription className="text-white/40">{instance.phone || 'Sem número vinculado'}</CardDescription>
                                 </div>
-                                <Badge className={instance.status === 'CONNECTED' ? 'bg-green-500/20 text-green-500 border-green-500/20' : 'bg-white/5 text-white/40 border-white/5'}>
-                                    {instance.status === 'CONNECTED' ? 'Conectado' : 'Desconectado'}
+                                <Badge className={instance.status === 'CONNECTED' ? 'bg-green-500/20 text-green-500 border-green-500/20' : 'bg-red-500/10 text-red-500 border-red-500/10'}>
+                                    {instance.status === 'CONNECTED' ? 'Online' : 'Offline'}
                                 </Badge>
                             </div>
                         </CardHeader>
                         <CardContent>
                             {instance.status === 'DISCONNECTED' || instance.status === 'INITIALIZING' ? (
-                                <div className="flex flex-col items-center justify-center p-6 bg-white/5 rounded-2xl border-2 border-dashed border-white/10 group-hover:border-primary/50 transition-colors">
+                                <div className="flex flex-col items-center justify-center p-6 bg-black/20 rounded-2xl border-2 border-dashed border-white/10 group-hover:border-primary/50 transition-colors">
                                     {instance.qrCode ? (
                                         <div className="bg-white p-2 rounded-xl shadow-lg mb-4">
                                             <img src={instance.qrCode} alt="WhatsApp QR Code" className="w-32 h-32" />

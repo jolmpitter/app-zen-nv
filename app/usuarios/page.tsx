@@ -268,15 +268,11 @@ export default function UsuariosPage() {
 
   return (
     <div className="pt-16 lg:pt-6 p-4 sm:p-6 space-y-4 sm:space-y-6">
-      {/* Back Button */}
-      <Button
-        variant="ghost"
-        onClick={() => router.push('/dashboard')}
-        className="mb-2"
-      >
-        <ArrowLeft className="w-4 h-4 mr-2" />
-        Voltar
-      </Button>
+      <PageHeader
+        title="Gestão de Usuários"
+        subtitle="Controle de acesso e permissões"
+        backHref="/dashboard"
+      />
 
       {/* Header */}
       <AnimatedDiv
@@ -287,7 +283,7 @@ export default function UsuariosPage() {
       >
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Gestão de Usuários
+            Usuários do Sistema
           </h1>
           <p className="text-gray-600 dark:text-gray-300 mt-1 text-sm sm:text-base">
             Gerencie gestores e atendentes do sistema

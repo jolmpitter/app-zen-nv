@@ -19,6 +19,7 @@ import {
   BarChart3,
   LineChart as LineChartIcon,
   Activity,
+  Filter,
 } from 'lucide-react';
 import {
   LineChart, Line, BarChart, Bar, AreaChart, Area, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
@@ -97,6 +98,13 @@ export default function DashboardPage() {
   const prefersReducedMotion = usePrefersReducedMotion();
   const { ref: filterRef, shouldAnimate: shouldAnimateFilters } = useLazyAnimation({ threshold: 0.1, triggerOnce: true });
   const { ref: kpiRef, shouldAnimate: shouldAnimateKpis } = useLazyAnimation({ threshold: 0.1, triggerOnce: true, delay: 100 });
+  const { ref: chartsRef, shouldAnimate: shouldAnimateCharts } = useLazyAnimation({ threshold: 0.1, triggerOnce: true, delay: 200 });
+
+  // Prepare chart data from metrics
+  const chartData = metrics.length > 0 ? metrics.map(m => ({
+    month: new Date(m.date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
+    vendas: m.valorVendido
+  })).reverse().slice(-30) : [];
 
   useEffect(() => {
     fetchData();
@@ -292,10 +300,96 @@ export default function DashboardPage() {
         onDateRangeChange={setDateRange}
       />
 
+      {/* Gráficos de Evolução */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <AnimatedDiv
+          className="glass-card p-6 rounded-[24px]"
+          variants={shouldAnimateCharts && !prefersReducedMotion ? fadeInUp : undefined}
+          transition={{ delay: 0.2 }}
+        >
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h3 className="text-lg font-semibold text-white">Evolução de Vendas</h3>
+              <p className="text-sm text-gray-400">Acompanhamento diário</p>
+            </div>
+            <div className="p-2 bg-primary/10 rounded-lg">
+              <LineChartIcon className="w-5 h-5 text-primary" />
+            </div>
+          </div>
+          <div className="h-[300px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={chartData}>
+                <defs>
+                  <linearGradient id="colorVendas" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#a855f7" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#a855f7" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" vertical={false} />
+                <XAxis
+                  dataKey="month"
+                  stroke="#9ca3af"
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                  dy={10}
+                />
+                <YAxis
+                  stroke="#9ca3af"
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={(value) => `R$ ${value}`}
+                  dx={-10}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'rgba(20, 20, 30, 0.9)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '12px',
+                    backdropFilter: 'blur(10px)'
+                  }}
+                  itemStyle={{ color: '#fff' }}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="vendas"
+                  stroke="#a855f7"
+                  strokeWidth={3}
+                  fillOpacity={1}
+                  fill="url(#colorVendas)"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </AnimatedDiv>
+
+        {/* Funil de Conversão */}
+        <AnimatedDiv
+          className="glass-card p-6 rounded-[24px]"
+          variants={shouldAnimateCharts && !prefersReducedMotion ? fadeInUp : undefined}
+          transition={{ delay: 0.3 }}
+        >
+          {/* Placeholder for Funnel Chart content */}
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h3 className="text-lg font-semibold text-white">Funil de Conversão</h3>
+              <p className="text-sm text-gray-400">Visão geral do processo</p>
+            </div>
+            <div className="p-2 bg-primary/10 rounded-lg">
+              <Filter className="w-5 h-5 text-primary" />
+            </div>
+          </div>
+          <div className="h-[300px] w-full flex items-center justify-center text-gray-500">
+            Funil de Conversão (Gráfico a ser implementado)
+          </div>
+        </AnimatedDiv>
+      </div>
+
       {/* Filtros - Seção Compacta */}
       <AnimatedDiv
         ref={filterRef}
-        className="bg-white/5 backdrop-blur-3xl p-6 rounded-[24px] border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.3)] transition-all duration-500"
+        className="glass-card p-6 rounded-[24px]"
         variants={shouldAnimateFilters && !prefersReducedMotion ? fadeInUp : undefined}
         initial="hidden"
         animate="visible"
@@ -534,81 +628,83 @@ export default function DashboardPage() {
       </StaggerContainer>
 
       {/* Seção de Métricas Detalhadas */}
-      <Card>
+      <Card className="glass-card border-none">
         <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
+          <CardTitle className="text-lg flex items-center gap-2 text-white">
             <Activity className="w-5 h-5 text-amber-500" />
             Métricas Principais
           </CardTitle>
-          <CardDescription>Resumo detalhado de performance e resultados</CardDescription>
+          <CardDescription className="text-gray-400">Resumo detalhado de performance e resultados</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {/* Total Vendido */}
-            <div className="p-4 bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20 rounded-lg hover:shadow-md transition-all">
-              <div className="flex items-center gap-2 mb-2">
-                <DollarSign className="w-5 h-5 text-blue-500" />
-                <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Total Vendido</span>
-              </div>
-              <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                R$ {(summary?.totalVendido || 0)?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-              </p>
-            </div>
 
             {/* Gasto Total */}
-            <div className="p-4 bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/20 rounded-lg hover:shadow-md transition-all">
+            <div className="p-4 bg-primary/5 border border-primary/20 rounded-xl hover:bg-primary/10 transition-all">
               <div className="flex items-center gap-2 mb-2">
                 <TrendingUp className="w-5 h-5 text-purple-500" />
-                <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Gasto Total</span>
+                <span className="text-sm font-semibold text-gray-300">Gasto Total</span>
               </div>
-              <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+              <p className="text-2xl font-bold text-white">
                 R$ {(summary?.totalGasto || 0)?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
               </p>
             </div>
 
             {/* ROI */}
-            <div className="p-4 bg-gradient-to-br from-green-500/10 to-green-600/5 border border-green-500/20 rounded-lg hover:shadow-md transition-all">
+            <div className="p-4 bg-green-500/5 border border-green-500/20 rounded-xl hover:bg-green-500/10 transition-all">
               <div className="flex items-center gap-2 mb-2">
                 <TrendingUp className="w-5 h-5 text-green-500" />
-                <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">ROI</span>
+                <span className="text-sm font-semibold text-gray-300">ROI</span>
               </div>
-              <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+              <p className="text-2xl font-bold text-white">
                 {(summary?.roiGeral || 0)?.toFixed(1)}%
               </p>
             </div>
 
             {/* Total de Leads */}
-            <div className="p-4 bg-gradient-to-br from-orange-500/10 to-orange-600/5 border border-orange-500/20 rounded-lg hover:shadow-md transition-all">
+            <div className="p-4 bg-orange-500/5 border border-orange-500/20 rounded-xl hover:bg-orange-500/10 transition-all">
               <div className="flex items-center gap-2 mb-2">
                 <Users className="w-5 h-5 text-orange-500" />
-                <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Total de Leads</span>
+                <span className="text-sm font-semibold text-gray-300">Total de Leads</span>
               </div>
-              <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+              <p className="text-2xl font-bold text-white">
                 {summary?.totalLeads || 0}
               </p>
             </div>
 
             {/* Total de Vendas */}
-            <div className="p-4 bg-gradient-to-br from-pink-500/10 to-pink-600/5 border border-pink-500/20 rounded-lg hover:shadow-md transition-all">
+            <div className="p-4 bg-pink-500/5 border border-pink-500/20 rounded-xl hover:bg-pink-500/10 transition-all">
               <div className="flex items-center gap-2 mb-2">
                 <ShoppingCart className="w-5 h-5 text-pink-500" />
-                <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Total de Vendas</span>
+                <span className="text-sm font-semibold text-gray-300">Total de Vendas</span>
               </div>
-              <p className="text-2xl font-bold text-pink-600 dark:text-pink-400">
+              <p className="text-2xl font-bold text-white">
                 {summary?.totalVendas || 0}
               </p>
             </div>
 
             {/* Custo por Lead */}
-            <div className="p-4 bg-gradient-to-br from-indigo-500/10 to-indigo-600/5 border border-indigo-500/20 rounded-lg hover:shadow-md transition-all">
+            <div className="p-4 bg-indigo-500/5 border border-indigo-500/20 rounded-xl hover:bg-indigo-500/10 transition-all">
               <div className="flex items-center gap-2 mb-2">
                 <Target className="w-5 h-5 text-indigo-500" />
-                <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Custo por Lead</span>
+                <span className="text-sm font-semibold text-gray-300">Custo por Lead</span>
               </div>
-              <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
+              <p className="text-2xl font-bold text-white">
                 R$ {(summary?.custoPorLeadMedio || 0)?.toFixed(2)}
               </p>
             </div>
+
+            {/* Ticket Médio */}
+            <div className="p-4 bg-cyan-500/5 border border-cyan-500/20 rounded-xl hover:bg-cyan-500/10 transition-all">
+              <div className="flex items-center gap-2 mb-2">
+                <DollarSign className="w-5 h-5 text-cyan-500" />
+                <span className="text-sm font-semibold text-gray-300">Ticket Médio</span>
+              </div>
+              <p className="text-2xl font-bold text-white">
+                R$ {(summary?.ticketMedio || 0)?.toFixed(2)}
+              </p>
+            </div>
+
           </div>
         </CardContent>
       </Card>
@@ -665,6 +761,6 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 }

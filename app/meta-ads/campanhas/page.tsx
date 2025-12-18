@@ -43,7 +43,7 @@ export default function CampanhasPage() {
 
   useEffect(() => {
     if (status === 'loading') return;
-    
+
     if (!session) {
       router.push('/login');
       return;
@@ -151,14 +151,14 @@ export default function CampanhasPage() {
 
       const data = await res.json();
       toast.dismiss(loadingToast);
-      
+
       if (data.error) {
         toast.error(data.error);
       } else {
         const changesText = [];
         if (updates.status) changesText.push(`Status: ${updates.status}`);
         if (updates.dailyBudget) changesText.push(`Orçamento: R$ ${updates.dailyBudget.toFixed(2)}`);
-        
+
         toast.success(`Campanha atualizada! ${changesText.join(' • ')}`);
         setEditingCampaign(null);
         setNewBudget('');
@@ -213,107 +213,101 @@ export default function CampanhasPage() {
 
   return (
     <div className="container mx-auto p-4 sm:p-6 pt-16 lg:pt-6 max-w-7xl">
-      <div className="flex items-center gap-4 mb-6">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => router.push('/meta-ads')}
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </Button>
-        <div>
-          <h1 className="text-3xl font-bold">Gestão de Campanhas</h1>
-          <p className="text-muted-foreground mt-1">Gerencie suas campanhas do Meta Ads</p>
-        </div>
-      </div>
+      <PageHeader
+        title="Minhas Campanhas"
+        subtitle="Gerencie suas campanhas do Meta Ads"
+        backHref="/dashboard"
+      />
 
-      {/* Seleção de Conta */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>Conta de Anúncios</CardTitle>
-          <CardDescription>Selecione a conta para gerenciar</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Select value={selectedAccount} onValueChange={setSelectedAccount}>
-            <SelectTrigger>
-              <SelectValue placeholder="Selecione uma conta" />
-            </SelectTrigger>
-            <SelectContent>
-              {accounts.map((account) => (
-                <SelectItem key={account.id} value={account.id}>
-                  {account.accountName} {account.isActive && '(Ativa)'}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </CardContent>
-      </Card>
-
-      {/* Lista de Campanhas */}
-      {loading ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-        </div>
-      ) : campaigns.length === 0 ? (
+      <div className="mt-6 space-y-6">
+        {/* Seleção de Conta */}
         <Card>
-          <CardContent className="py-12 text-center">
-            <p className="text-muted-foreground">Nenhuma campanha encontrada</p>
+          <CardHeader>
+            <CardTitle>Conta de Anúncios</CardTitle>
+            <CardDescription>Selecione a conta para gerenciar</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Select value={selectedAccount} onValueChange={setSelectedAccount}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione uma conta" />
+              </SelectTrigger>
+              <SelectContent>
+                {accounts.map((account) => (
+                  <SelectItem key={account.id} value={account.id}>
+                    {account.accountName} {account.isActive && '(Ativa)'}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </CardContent>
         </Card>
-      ) : (
-        <div className="grid gap-4">
-          {campaigns.map((campaign) => (
-            <Card key={campaign.id}>
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <CardTitle className="text-lg">{campaign.name}</CardTitle>
-                      <Badge className={getStatusColor(campaign.status)}>
-                        {getStatusLabel(campaign.status)}
-                      </Badge>
-                    </div>
-                    <CardDescription className="flex items-center gap-4 flex-wrap">
-                      <span className="flex items-center gap-1">
-                        <TrendingUp className="w-4 h-4" />
-                        {campaign.objective}
-                      </span>
-                      {campaign.daily_budget && (
+
+        {/* Lista de Campanhas */}
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          </div>
+        ) : campaigns.length === 0 ? (
+          <Card>
+            <CardContent className="py-12 text-center">
+              <p className="text-muted-foreground">Nenhuma campanha encontrada</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-4">
+            {campaigns.map((campaign) => (
+              <Card key={campaign.id}>
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <CardTitle className="text-lg">{campaign.name}</CardTitle>
+                        <Badge className={getStatusColor(campaign.status)}>
+                          {getStatusLabel(campaign.status)}
+                        </Badge>
+                      </div>
+                      <CardDescription className="flex items-center gap-4 flex-wrap">
                         <span className="flex items-center gap-1">
-                          <DollarSign className="w-4 h-4" />
-                          R$ {campaign.daily_budget.toFixed(2)}/dia
+                          <TrendingUp className="w-4 h-4" />
+                          {campaign.objective}
                         </span>
-                      )}
-                      <span className="flex items-center gap-1">
-                        <Calendar className="w-4 h-4" />
-                        {new Date(campaign.created_time).toLocaleDateString('pt-BR')}
-                      </span>
-                    </CardDescription>
+                        {campaign.daily_budget && (
+                          <span className="flex items-center gap-1">
+                            <DollarSign className="w-4 h-4" />
+                            R$ {campaign.daily_budget.toFixed(2)}/dia
+                          </span>
+                        )}
+                        <span className="flex items-center gap-1">
+                          <Calendar className="w-4 h-4" />
+                          {new Date(campaign.created_time).toLocaleDateString('pt-BR')}
+                        </span>
+                      </CardDescription>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => router.push(`/meta-ads/campanhas/${campaign.id}`)}
+                      >
+                        <Layers className="w-4 h-4 mr-2" />
+                        Ad Sets
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => openEditDialog(campaign)}
+                      >
+                        <Settings className="w-4 h-4 mr-2" />
+                        Editar
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => router.push(`/meta-ads/campanhas/${campaign.id}`)}
-                    >
-                      <Layers className="w-4 h-4 mr-2" />
-                      Ad Sets
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => openEditDialog(campaign)}
-                    >
-                      <Settings className="w-4 h-4 mr-2" />
-                      Editar
-                    </Button>
-                  </div>
-                </div>
-              </CardHeader>
-            </Card>
-          ))}
-        </div>
-      )}
+                </CardHeader>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* Dialog de Edição */}
       <Dialog open={!!editingCampaign} onOpenChange={(open) => !open && setEditingCampaign(null)}>
