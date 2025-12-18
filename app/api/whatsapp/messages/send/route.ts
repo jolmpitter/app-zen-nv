@@ -30,6 +30,10 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Lead ou Instância não encontrada' }, { status: 404 });
         }
 
+        if (!lead.phone) {
+            return NextResponse.json({ error: 'Lead sem número de telefone cadastrado' }, { status: 400 });
+        }
+
         // Enviar via Evolution API
         // Sanitizar nome da instância (mesma lógica usada na criação)
         const instanceName = instance.name.replace(/\s+/g, '_').toLowerCase();
