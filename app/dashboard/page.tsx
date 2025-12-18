@@ -40,6 +40,7 @@ import { LeadsPipelineTable } from '@/components/dashboard/leads-pipeline-table'
 import { CreativePerformanceRadar } from '@/components/dashboard/creative-performance-radar';
 import { MonthlyGrowthArea } from '@/components/dashboard/monthly-growth-area';
 import { GlobalSearch } from '@/components/dashboard/global-search';
+import { DashboardHeader } from '@/components/layout/dashboard-header';
 
 interface MetricsSummary {
   totalGasto: number;
@@ -281,25 +282,15 @@ export default function DashboardPage() {
 
   return (
     <div className="pt-16 lg:pt-6 p-4 sm:p-6 space-y-4 sm:space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">Dashboard</h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm sm:text-base">
-            Bem-vindo, {session?.user?.name || 'Usuário'}
-          </p>
-        </div>
-
-        <div className="flex-1 max-w-md hidden md:block">
-          <GlobalSearch />
-        </div>
-
-        <div className="flex items-center gap-3">
-          <Badge variant="outline" className="text-xs sm:text-sm px-3 py-1">
-            {session?.user?.role === 'gerente' ? 'Gerente' : session?.user?.role === 'gestor' ? 'Gestor' : 'Atendente'}
-          </Badge>
-        </div>
-      </div>
+      {/* New Premium Header */}
+      <DashboardHeader
+        title="Dashboard"
+        subtitle={`Bem-vindo, ${session?.user?.name || 'Usuário'}`}
+        showSearch={true}
+        showDateFilter={true}
+        dateRange={dateRange}
+        onDateRangeChange={setDateRange}
+      />
 
       {/* Filtros - Seção Compacta */}
       <AnimatedDiv
