@@ -14,8 +14,9 @@ import {
   Plus,
   Settings,
   BarChart3,
-  AlertTriangle,
   Lightbulb,
+  ArrowLeft,
+  AlertTriangle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -138,7 +139,7 @@ export default function MetaAdsPage() {
       const res = await fetch(`/api/integrations/facebook/insights?period=${period}&accountId=${selectedAccount}`);
       const data = await res.json();
       if (!data.error) {
-        setMetrics(data);
+        setMetrics(data && !Array.isArray(data) ? data : null);
       }
     } catch (error) {
       console.error('Erro ao buscar métricas:', error);
@@ -150,7 +151,7 @@ export default function MetaAdsPage() {
       const res = await fetch(`/api/integrations/facebook/time-series?accountId=${selectedAccount}`);
       const data = await res.json();
       if (!data.error) {
-        setTimeSeriesData(data);
+        setTimeSeriesData(Array.isArray(data) ? data : []);
       }
     } catch (error) {
       console.error('Erro ao buscar séries temporais:', error);
@@ -335,16 +336,26 @@ export default function MetaAdsPage() {
 
   return (
     <div className="container mx-auto p-4 sm:p-6 pt-16 lg:pt-6 max-w-7xl">
-      <AnimatedDiv 
+      <AnimatedDiv
         ref={headerRef}
         variants={shouldAnimateHeader ? fadeInUp : undefined}
         initial="initial"
         animate="animate"
         className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6"
       >
-        <div>
-          <h1 className="text-3xl font-bold">📊 Meta Ads</h1>
-          <p className="text-muted-foreground mt-1">Análise completa de campanhas</p>
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => router.push('/dashboard')}
+            className="rounded-full hover:bg-muted"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold font-display tracking-tight">Análise Meta Ads</h1>
+            <p className="text-muted-foreground mt-0.5 text-sm">Performance e ROI em tempo real</p>
+          </div>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => router.push('/integracoes')}>
@@ -435,82 +446,82 @@ export default function MetaAdsPage() {
                 <AnimatedDiv
                   variants={shouldAnimateMetrics ? staggerItem : undefined}
                 >
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium flex items-center gap-2">
-                      <DollarSign className="w-4 h-4" />
-                      Gasto Total
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">
-                      R$ {metrics?.spend?.toFixed(2) || '0.00'}
-                    </div>
-                  </CardContent>
-                </Card>
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium flex items-center gap-2">
+                        <DollarSign className="w-4 h-4" />
+                        Gasto Total
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">
+                        R$ {metrics?.spend?.toFixed(2) || '0.00'}
+                      </div>
+                    </CardContent>
+                  </Card>
                 </AnimatedDiv>
 
                 <AnimatedDiv
                   variants={shouldAnimateMetrics ? staggerItem : undefined}
                 >
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium flex items-center gap-2">
-                      <Eye className="w-4 h-4" />
-                      Impressões
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">
-                      {metrics?.impressions?.toLocaleString('pt-BR') || '0'}
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      CPM: R$ {metrics?.cpm?.toFixed(2) || '0.00'}
-                    </p>
-                  </CardContent>
-                </Card>
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium flex items-center gap-2">
+                        <Eye className="w-4 h-4" />
+                        Impressões
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">
+                        {metrics?.impressions?.toLocaleString('pt-BR') || '0'}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        CPM: R$ {metrics?.cpm?.toFixed(2) || '0.00'}
+                      </p>
+                    </CardContent>
+                  </Card>
                 </AnimatedDiv>
 
                 <AnimatedDiv
                   variants={shouldAnimateMetrics ? staggerItem : undefined}
                 >
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium flex items-center gap-2">
-                      <MousePointerClick className="w-4 h-4" />
-                      Cliques
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">
-                      {metrics?.clicks?.toLocaleString('pt-BR') || '0'}
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      CTR: {metrics?.ctr?.toFixed(2) || '0.00'}% | CPC: R$ {metrics?.cpc?.toFixed(2) || '0.00'}
-                    </p>
-                  </CardContent>
-                </Card>
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium flex items-center gap-2">
+                        <MousePointerClick className="w-4 h-4" />
+                        Cliques
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">
+                        {metrics?.clicks?.toLocaleString('pt-BR') || '0'}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        CTR: {metrics?.ctr?.toFixed(2) || '0.00'}% | CPC: R$ {metrics?.cpc?.toFixed(2) || '0.00'}
+                      </p>
+                    </CardContent>
+                  </Card>
                 </AnimatedDiv>
 
                 <AnimatedDiv
                   variants={shouldAnimateMetrics ? staggerItem : undefined}
                 >
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium flex items-center gap-2">
-                      <Target className="w-4 h-4" />
-                      Conversões
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">
-                      {metrics?.conversions?.toLocaleString('pt-BR') || '0'}
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Taxa: {metrics?.conversionRate?.toFixed(2) || '0.00'}%
-                    </p>
-                  </CardContent>
-                </Card>
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium flex items-center gap-2">
+                        <Target className="w-4 h-4" />
+                        Conversões
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">
+                        {metrics?.conversions?.toLocaleString('pt-BR') || '0'}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Taxa: {metrics?.conversionRate?.toFixed(2) || '0.00'}%
+                      </p>
+                    </CardContent>
+                  </Card>
                 </AnimatedDiv>
               </StaggerContainer>
 
@@ -520,12 +531,12 @@ export default function MetaAdsPage() {
                 initial="initial"
                 animate="animate"
               >
-              <ConversionFunnel
-                impressions={metrics?.impressions || 0}
-                clicks={metrics?.clicks || 0}
-                leads={metrics?.leads || 0}
-                conversions={metrics?.conversions || 0}
-              />
+                <ConversionFunnel
+                  impressions={metrics?.impressions || 0}
+                  clicks={metrics?.clicks || 0}
+                  leads={metrics?.leads || 0}
+                  conversions={metrics?.conversions || 0}
+                />
               </AnimatedDiv>
 
               {/* Gráficos Temporais */}

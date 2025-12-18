@@ -37,13 +37,19 @@ export async function POST(req: NextRequest) {
     // Hash da senha
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Criar usuário
+    // Criar usuário com regras SaaS: Pendente, Atendente e Trial de 7 dias
+    const trialDate = new Date();
+    trialDate.setDate(trialDate.getDate() + 7);
+
     const user = await prisma.user.create({
       data: {
         email,
         password: hashedPassword,
         name,
-        role: role || 'atendente',
+        role: 'atendente', // Força atendente no registro público
+        status: 'PENDIENTE', // Precisa de aprovação
+        subscriptionStatus: 'TRIAL',
+        expiresAt: trialDate,
       },
     });
 

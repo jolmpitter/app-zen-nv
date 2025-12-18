@@ -1,0 +1,54 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { v4 as uuidv4 } from 'uuid';
+
+export async function POST(req: NextRequest) {
+    try {
+        const session = await getServerSession(authOptions);
+        if (!session?.user?.companyId || (session.user.role !== 'cio' && session.user.role !== 'gerente')) {
+            return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+        }
+
+        const { email, role } = await req.json();
+        const token = uuidv4();
+        const expiresAt = new Date();
+        expiresAt.setDate(expiresAt.getDate() + 7); // Expira em 7 dias
+
+        const invitation = await prisma.invitation.create({
+            data: {
+                email,
+                role,
+                token,
+                companyId: session.user.companyId,
+                expiresAt
+            }
+        });
+
+        const inviteLink = `${process.env.NEXTAUTH_URL}/signup/invite?token=${token}`;
+
+        return NextResponse.json({ invitation, inviteLink });
+    } catch (error) {
+        console.error('Error creating invitation:', error);
+        return NextResponse.json({ error: 'Erro ao criar convite' }, { status: 500 });
+    }
+}
+
+export async function GET(req: NextRequest) {
+    try {
+        const session = await getServerSession(authOptions);
+        if (!session?.user?.companyId) {
+            return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+        }
+
+        const invitations = await prisma.invitation.findMany({
+            where: { companyId: session.user.companyId },
+            orderBy: { createdAt: 'desc' }
+        });
+
+        return NextResponse.json(invitations);
+    } catch (error) {
+        return NextResponse.json({ error: 'Erro interno' }, { status: 500 });
+    }
+}

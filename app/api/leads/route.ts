@@ -18,16 +18,20 @@ export async function GET(req: NextRequest) {
 
     const where: any = {};
 
-    // Filtro de status
+    // Isolamento Multi-tenant
+    if (session.user.role !== 'cio') {
+      const currentGerenteId = session.user.role === 'gerente' ? session.user.id : session.user.gerenteId;
+      where.gerenteId = currentGerenteId;
+
+      // Filtro adicional para atendentes (só veem seus próprios leads dentro da equipe)
+      if (session.user.role === 'atendente') {
+        where.atendenteId = session.user.id;
+      }
+    }
+
     if (status && status !== 'todos') {
       where.status = status;
     }
-
-    // Controle de acesso por role
-    if (session.user.role === 'atendente') {
-      where.atendenteId = session.user.id;
-    }
-    // Gestor e Gerente veem todos os leads sem filtro
 
     const leads = await prisma.lead.findMany({
       where,
@@ -52,10 +56,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(leads);
   } catch (error) {
     console.error('Error fetching leads:', error);
-    return NextResponse.json(
-      { error: 'Erro ao buscar leads' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Erro ao buscar leads' }, { status: 500 });
   }
 }
 
@@ -67,27 +68,26 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
+    const currentGerenteId = session.user.role === 'gerente' ? session.user.id : session.user.gerenteId;
+
+    if (!currentGerenteId && session.user.role !== 'cio') {
+      return NextResponse.json({ error: 'Gerente da equipe não identificado' }, { status: 400 });
+    }
+
     const body = await req.json();
     const { name, email, phone, source, valorPotencial, notes, atendenteId } = body;
 
-    // Validações
     if (!name) {
-      return NextResponse.json(
-        { error: 'Nome é obrigatório' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Nome é obrigatório' }, { status: 400 });
     }
 
-    // Determinar atendente
     let finalAtendenteId = atendenteId;
-
     if (session.user.role === 'atendente') {
-      // Atendentes criam leads para si mesmos
       finalAtendenteId = session.user.id;
-    } else if ((session.user.role === 'gestor' || session.user.role === 'gerente') && !atendenteId) {
-      // Se gestor/gerente não especificou atendente, usa o primeiro disponível
+    } else if (!atendenteId) {
+      // Se gerente/cio/gestor não definiu, busca primeiro da equipe
       const primeiroAtendente = await prisma.user.findFirst({
-        where: session.user.role === 'gestor' ? { gestorId: session.user.id } : {},
+        where: { gerenteId: currentGerenteId, role: 'atendente' },
       });
       finalAtendenteId = primeiroAtendente?.id || session.user.id;
     }
@@ -101,36 +101,27 @@ export async function POST(req: NextRequest) {
         valorPotencial: valorPotencial ? parseFloat(valorPotencial) : null,
         notes,
         atendenteId: finalAtendenteId,
+        gerenteId: currentGerenteId,
         status: 'novo',
       },
       include: {
-        atendente: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
+        atendente: { select: { id: true, name: true, email: true } },
       },
     });
 
-    // Criar histórico
-    await prisma.leadHistory.create({
+    // Auditoria Enterprise
+    await prisma.auditLog.create({
       data: {
-        leadId: lead?.id || '',
+        companyId: session.user.companyId || '',
         userId: session.user.id,
-        action: 'lead_created',
-        description: 'Lead criado',
-        newValue: 'novo',
-      },
+        action: 'LEAD_CREATED',
+        details: JSON.stringify({ leadId: lead.id, name: lead.name })
+      }
     });
 
     return NextResponse.json(lead, { status: 201 });
   } catch (error) {
     console.error('Error creating lead:', error);
-    return NextResponse.json(
-      { error: 'Erro ao criar lead' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Erro ao criar lead' }, { status: 500 });
   }
 }

@@ -125,8 +125,9 @@ export default function UsuariosPage() {
       const response = await fetch('/api/users');
       if (response.ok) {
         const data = await response.json();
-        setUsers(data);
-        setGestores(data?.filter((u: User) => u?.role === 'gestor' || u?.role === 'gerente'));
+        const usersArray = Array.isArray(data) ? data : [];
+        setUsers(usersArray);
+        setGestores(usersArray.filter((u: User) => u?.role === 'gestor' || u?.role === 'gerente'));
       }
     } catch (error) {
       console.error('Erro ao buscar usuários:', error);

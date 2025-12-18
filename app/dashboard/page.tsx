@@ -20,7 +20,7 @@ import {
   LineChart as LineChartIcon,
   Activity,
 } from 'lucide-react';
-import { 
+import {
   LineChart, Line, BarChart, Bar, AreaChart, Area, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, CartesianGrid
 } from 'recharts';
@@ -89,7 +89,7 @@ export default function DashboardPage() {
   const [filterType, setFilterType] = useState<string>('atendente'); // 'atendente' ou 'gestor'
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [loading, setLoading] = useState(true);
-  
+
   // Hooks de otimização de performance
   const prefersReducedMotion = usePrefersReducedMotion();
   const { ref: filterRef, shouldAnimate: shouldAnimateFilters } = useLazyAnimation({ threshold: 0.1, triggerOnce: true });
@@ -132,18 +132,18 @@ export default function DashboardPage() {
       // Buscar sumário
       const summaryRes = await fetch(`/api/metrics/summary?${summaryParams}`);
       const summaryData = await summaryRes.json();
-      setSummary(summaryData);
+      setSummary(summaryData && !summaryData.error ? summaryData : null);
 
       // Buscar métricas detalhadas
       const metricsRes = await fetch(`/api/metrics?${metricsParams}`);
       const metricsData = await metricsRes.json();
-      setMetrics(metricsData);
+      setMetrics(Array.isArray(metricsData) ? metricsData : []);
 
       // Buscar usuários (gestores e gerente)
       if (session?.user?.role === 'gestor' || session?.user?.role === 'gerente') {
         const usersRes = await fetch('/api/users');
         const usersData = await usersRes.json();
-        setUsers(usersData);
+        setUsers(Array.isArray(usersData) ? usersData : []);
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -154,7 +154,7 @@ export default function DashboardPage() {
   };
 
   // Preparar dados para os novos gráficos
-  
+
   // 1. Evolução de CPA, CPL, CPC e ROAS
   const marketingEvolutionData = metrics
     ?.map((m) => ({
@@ -293,7 +293,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Filtros - Seção Compacta */}
-      <AnimatedDiv 
+      <AnimatedDiv
         ref={filterRef}
         className="bg-[#111827] p-5 rounded-[20px] border border-[#1f2937] shadow-[0_4px_24px_rgba(0,0,0,0.45)] transition-all duration-300"
         variants={shouldAnimateFilters && !prefersReducedMotion ? fadeInUp : undefined}
@@ -342,10 +342,10 @@ export default function DashboardPage() {
                   <SelectContent className="bg-[#0f172a] border-[#1e293b]">
                     <SelectItem value="todos" className="text-slate-200 focus:bg-slate-700">Todos</SelectItem>
                     {users
-                      ?.filter((user) => 
+                      ?.filter((user) =>
                         user?.id && (
-                          filterType === 'gestor' 
-                            ? user?.role === 'gestor' 
+                          filterType === 'gestor'
+                            ? user?.role === 'gestor'
                             : user?.role === 'atendente'
                         )
                       )
@@ -363,7 +363,7 @@ export default function DashboardPage() {
       </AnimatedDiv>
 
       {/* KPIs - Cards com Frosted Glass */}
-      <StaggerContainer 
+      <StaggerContainer
         ref={kpiRef}
         className="grid grid-cols-1 lg:grid-cols-4 gap-3 sm:gap-4 mt-4"
         variants={shouldAnimateKpis && !prefersReducedMotion ? undefined : {}}
@@ -372,164 +372,164 @@ export default function DashboardPage() {
         delay={0.1}
       >
         <AnimatedDiv variants={shouldAnimateKpis && !prefersReducedMotion ? staggerItem : undefined}>
-        <Card className="border border-[rgba(255,255,255,0.12)] bg-gradient-to-br from-[rgba(255,255,255,0.06)] to-[rgba(255,255,255,0.02)] backdrop-blur-md hover:shadow-2xl hover:shadow-emerald-500/20 hover:-translate-y-1 hover:scale-[1.02] transition-all duration-300">
-          <CardHeader className="pb-2.5">
-            <div className="icon-3d icon-green mb-2.5">
-              <DollarSign strokeWidth={2.5} />
-            </div>
-            <CardDescription className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
-              Total Vendido
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="pt-1">
-            <p className="text-2xl font-bold text-white break-all">
-              R$ {(summary?.totalVendido || 0)?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-            </p>
-          </CardContent>
-        </Card>
+          <Card className="border border-[rgba(255,255,255,0.12)] bg-gradient-to-br from-[rgba(255,255,255,0.06)] to-[rgba(255,255,255,0.02)] backdrop-blur-md hover:shadow-2xl hover:shadow-emerald-500/20 hover:-translate-y-1 hover:scale-[1.02] transition-all duration-300">
+            <CardHeader className="pb-2.5">
+              <div className="icon-3d icon-green mb-2.5">
+                <DollarSign strokeWidth={2.5} />
+              </div>
+              <CardDescription className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
+                Total Vendido
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-1">
+              <p className="text-2xl font-bold text-white break-all">
+                R$ {(summary?.totalVendido || 0)?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              </p>
+            </CardContent>
+          </Card>
         </AnimatedDiv>
 
         <AnimatedDiv variants={shouldAnimateKpis && !prefersReducedMotion ? staggerItem : undefined}>
-        <Card className="border border-[rgba(255,255,255,0.12)] bg-gradient-to-br from-[rgba(255,255,255,0.06)] to-[rgba(255,255,255,0.02)] backdrop-blur-md hover:shadow-2xl hover:shadow-red-500/20 hover:-translate-y-1 hover:scale-[1.02] transition-all duration-300">
-          <CardHeader className="pb-2.5">
-            <div className="icon-3d icon-red mb-2.5">
-              <TrendingDown strokeWidth={2.5} />
-            </div>
-            <CardDescription className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
-              Total Gasto
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="pt-1">
-            <p className="text-2xl font-bold text-white break-all">
-              R$ {(summary?.totalGasto || 0)?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-            </p>
-          </CardContent>
-        </Card>
+          <Card className="border border-[rgba(255,255,255,0.12)] bg-gradient-to-br from-[rgba(255,255,255,0.06)] to-[rgba(255,255,255,0.02)] backdrop-blur-md hover:shadow-2xl hover:shadow-red-500/20 hover:-translate-y-1 hover:scale-[1.02] transition-all duration-300">
+            <CardHeader className="pb-2.5">
+              <div className="icon-3d icon-red mb-2.5">
+                <TrendingDown strokeWidth={2.5} />
+              </div>
+              <CardDescription className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
+                Total Gasto
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-1">
+              <p className="text-2xl font-bold text-white break-all">
+                R$ {(summary?.totalGasto || 0)?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              </p>
+            </CardContent>
+          </Card>
         </AnimatedDiv>
 
         <AnimatedDiv variants={shouldAnimateKpis && !prefersReducedMotion ? staggerItem : undefined}>
-        <Card className="border border-[rgba(255,255,255,0.12)] bg-gradient-to-br from-[rgba(255,255,255,0.06)] to-[rgba(255,255,255,0.02)] backdrop-blur-md hover:shadow-2xl hover:shadow-amber-500/20 hover:-translate-y-1 hover:scale-[1.02] transition-all duration-300">
-          <CardHeader className="pb-2.5">
-            <div className="icon-3d icon-yellow mb-2.5">
-              <TrendingUp strokeWidth={2.5} />
-            </div>
-            <CardDescription className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
-              Lucro Líquido
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="pt-1">
-            <p className="text-2xl font-bold text-white break-all">
-              R$ {((summary?.totalVendido || 0) - (summary?.totalGasto || 0))?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-            </p>
-          </CardContent>
-        </Card>
+          <Card className="border border-[rgba(255,255,255,0.12)] bg-gradient-to-br from-[rgba(255,255,255,0.06)] to-[rgba(255,255,255,0.02)] backdrop-blur-md hover:shadow-2xl hover:shadow-amber-500/20 hover:-translate-y-1 hover:scale-[1.02] transition-all duration-300">
+            <CardHeader className="pb-2.5">
+              <div className="icon-3d icon-yellow mb-2.5">
+                <TrendingUp strokeWidth={2.5} />
+              </div>
+              <CardDescription className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
+                Lucro Líquido
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-1">
+              <p className="text-2xl font-bold text-white break-all">
+                R$ {((summary?.totalVendido || 0) - (summary?.totalGasto || 0))?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              </p>
+            </CardContent>
+          </Card>
         </AnimatedDiv>
 
         <AnimatedDiv variants={shouldAnimateKpis && !prefersReducedMotion ? staggerItem : undefined}>
-        <Card className="border border-[rgba(255,255,255,0.12)] bg-gradient-to-br from-[rgba(255,255,255,0.06)] to-[rgba(255,255,255,0.02)] backdrop-blur-md hover:shadow-2xl hover:shadow-blue-500/20 hover:-translate-y-1 hover:scale-[1.02] transition-all duration-300">
-          <CardHeader className="pb-2.5">
-            <div className="icon-3d icon-blue mb-2.5">
-              <Users strokeWidth={2.5} />
-            </div>
-            <CardDescription className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
-              Total de Leads
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="pt-1">
-            <p className="text-2xl font-bold text-white">{summary?.totalLeads || 0}</p>
-          </CardContent>
-        </Card>
+          <Card className="border border-[rgba(255,255,255,0.12)] bg-gradient-to-br from-[rgba(255,255,255,0.06)] to-[rgba(255,255,255,0.02)] backdrop-blur-md hover:shadow-2xl hover:shadow-blue-500/20 hover:-translate-y-1 hover:scale-[1.02] transition-all duration-300">
+            <CardHeader className="pb-2.5">
+              <div className="icon-3d icon-blue mb-2.5">
+                <Users strokeWidth={2.5} />
+              </div>
+              <CardDescription className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
+                Total de Leads
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-1">
+              <p className="text-2xl font-bold text-white">{summary?.totalLeads || 0}</p>
+            </CardContent>
+          </Card>
         </AnimatedDiv>
 
         <AnimatedDiv variants={shouldAnimateKpis && !prefersReducedMotion ? staggerItem : undefined}>
-        <Card className="border border-[rgba(255,255,255,0.12)] bg-gradient-to-br from-[rgba(255,255,255,0.06)] to-[rgba(255,255,255,0.02)] backdrop-blur-md hover:shadow-2xl hover:shadow-purple-500/20 hover:-translate-y-1 hover:scale-[1.02] transition-all duration-300">
-          <CardHeader className="pb-2.5">
-            <div className="icon-3d icon-purple mb-2.5">
-              <ShoppingCart strokeWidth={2.5} />
-            </div>
-            <CardDescription className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
-              Total de Vendas
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="pt-1">
-            <p className="text-2xl font-bold text-white">{summary?.totalVendas || 0}</p>
-          </CardContent>
-        </Card>
+          <Card className="border border-[rgba(255,255,255,0.12)] bg-gradient-to-br from-[rgba(255,255,255,0.06)] to-[rgba(255,255,255,0.02)] backdrop-blur-md hover:shadow-2xl hover:shadow-purple-500/20 hover:-translate-y-1 hover:scale-[1.02] transition-all duration-300">
+            <CardHeader className="pb-2.5">
+              <div className="icon-3d icon-purple mb-2.5">
+                <ShoppingCart strokeWidth={2.5} />
+              </div>
+              <CardDescription className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
+                Total de Vendas
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-1">
+              <p className="text-2xl font-bold text-white">{summary?.totalVendas || 0}</p>
+            </CardContent>
+          </Card>
         </AnimatedDiv>
 
         <AnimatedDiv variants={shouldAnimateKpis && !prefersReducedMotion ? staggerItem : undefined}>
-        <Card className="border border-[rgba(255,255,255,0.12)] bg-gradient-to-br from-[rgba(255,255,255,0.06)] to-[rgba(255,255,255,0.02)] backdrop-blur-md hover:shadow-2xl hover:shadow-pink-500/20 hover:-translate-y-1 hover:scale-[1.02] transition-all duration-300">
-          <CardHeader className="pb-2.5">
-            <div className="icon-3d icon-pink mb-2.5">
-              <Percent strokeWidth={2.5} />
-            </div>
-            <CardDescription className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
-              Taxa de Conversão
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="pt-1">
-            <p className="text-2xl font-bold text-white">
-              {(summary?.taxaConversaoMedia || 0)?.toFixed(1)}%
-            </p>
-          </CardContent>
-        </Card>
+          <Card className="border border-[rgba(255,255,255,0.12)] bg-gradient-to-br from-[rgba(255,255,255,0.06)] to-[rgba(255,255,255,0.02)] backdrop-blur-md hover:shadow-2xl hover:shadow-pink-500/20 hover:-translate-y-1 hover:scale-[1.02] transition-all duration-300">
+            <CardHeader className="pb-2.5">
+              <div className="icon-3d icon-pink mb-2.5">
+                <Percent strokeWidth={2.5} />
+              </div>
+              <CardDescription className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
+                Taxa de Conversão
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-1">
+              <p className="text-2xl font-bold text-white">
+                {(summary?.taxaConversaoMedia || 0)?.toFixed(1)}%
+              </p>
+            </CardContent>
+          </Card>
         </AnimatedDiv>
 
         <AnimatedDiv variants={shouldAnimateKpis && !prefersReducedMotion ? staggerItem : undefined}>
-        <Card className="border border-[rgba(255,255,255,0.12)] bg-gradient-to-br from-[rgba(255,255,255,0.06)] to-[rgba(255,255,255,0.02)] backdrop-blur-md hover:shadow-2xl hover:shadow-emerald-500/20 hover:-translate-y-1 hover:scale-[1.02] transition-all duration-300">
-          <CardHeader className="pb-2.5">
-            <div className="icon-3d icon-green mb-2.5">
-              <Sprout strokeWidth={2.5} />
-            </div>
-            <CardDescription className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
-              Vendas Orgânicas
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="pt-1">
-            <p className="text-2xl font-bold text-white">
-              {summary?.totalVendasOrganicas || 0} vendas
-            </p>
-            <p className="text-xs text-slate-400 mt-1">
-              R$ {(summary?.totalVendidoOrganico || 0)?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-            </p>
-          </CardContent>
-        </Card>
+          <Card className="border border-[rgba(255,255,255,0.12)] bg-gradient-to-br from-[rgba(255,255,255,0.06)] to-[rgba(255,255,255,0.02)] backdrop-blur-md hover:shadow-2xl hover:shadow-emerald-500/20 hover:-translate-y-1 hover:scale-[1.02] transition-all duration-300">
+            <CardHeader className="pb-2.5">
+              <div className="icon-3d icon-green mb-2.5">
+                <Sprout strokeWidth={2.5} />
+              </div>
+              <CardDescription className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
+                Vendas Orgânicas
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-1">
+              <p className="text-2xl font-bold text-white">
+                {summary?.totalVendasOrganicas || 0} vendas
+              </p>
+              <p className="text-xs text-slate-400 mt-1">
+                R$ {(summary?.totalVendidoOrganico || 0)?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              </p>
+            </CardContent>
+          </Card>
         </AnimatedDiv>
 
         <AnimatedDiv variants={shouldAnimateKpis && !prefersReducedMotion ? staggerItem : undefined}>
-        <Card className="border border-[rgba(255,255,255,0.12)] bg-gradient-to-br from-[rgba(255,255,255,0.06)] to-[rgba(255,255,255,0.02)] backdrop-blur-md hover:shadow-2xl hover:shadow-orange-500/20 hover:-translate-y-1 hover:scale-[1.02] transition-all duration-300">
-          <CardHeader className="pb-2.5">
-            <div className="icon-3d icon-orange mb-2.5">
-              <Target strokeWidth={2.5} />
-            </div>
-            <CardDescription className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
-              Custo por Lead
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="pt-1">
-            <p className="text-2xl font-bold text-white">
-              R$ {(summary?.custoPorLeadMedio || 0)?.toFixed(2)}
-            </p>
-          </CardContent>
-        </Card>
+          <Card className="border border-[rgba(255,255,255,0.12)] bg-gradient-to-br from-[rgba(255,255,255,0.06)] to-[rgba(255,255,255,0.02)] backdrop-blur-md hover:shadow-2xl hover:shadow-orange-500/20 hover:-translate-y-1 hover:scale-[1.02] transition-all duration-300">
+            <CardHeader className="pb-2.5">
+              <div className="icon-3d icon-orange mb-2.5">
+                <Target strokeWidth={2.5} />
+              </div>
+              <CardDescription className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
+                Custo por Lead
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-1">
+              <p className="text-2xl font-bold text-white">
+                R$ {(summary?.custoPorLeadMedio || 0)?.toFixed(2)}
+              </p>
+            </CardContent>
+          </Card>
         </AnimatedDiv>
 
         <AnimatedDiv variants={shouldAnimateKpis && !prefersReducedMotion ? staggerItem : undefined}>
-        <Card className="border border-[rgba(255,255,255,0.12)] bg-gradient-to-br from-[rgba(255,255,255,0.06)] to-[rgba(255,255,255,0.02)] backdrop-blur-md hover:shadow-2xl hover:shadow-cyan-500/20 hover:-translate-y-1 hover:scale-[1.02] transition-all duration-300">
-          <CardHeader className="pb-2.5">
-            <div className="icon-3d icon-cyan mb-2.5">
-              <DollarSign strokeWidth={2.5} />
-            </div>
-            <CardDescription className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
-              Ticket Médio
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="pt-1">
-            <p className="text-2xl font-bold text-white">
-              R$ {(summary?.ticketMedio || 0)?.toFixed(2)}
-            </p>
-          </CardContent>
-        </Card>
+          <Card className="border border-[rgba(255,255,255,0.12)] bg-gradient-to-br from-[rgba(255,255,255,0.06)] to-[rgba(255,255,255,0.02)] backdrop-blur-md hover:shadow-2xl hover:shadow-cyan-500/20 hover:-translate-y-1 hover:scale-[1.02] transition-all duration-300">
+            <CardHeader className="pb-2.5">
+              <div className="icon-3d icon-cyan mb-2.5">
+                <DollarSign strokeWidth={2.5} />
+              </div>
+              <CardDescription className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
+                Ticket Médio
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-1">
+              <p className="text-2xl font-bold text-white">
+                R$ {(summary?.ticketMedio || 0)?.toFixed(2)}
+              </p>
+            </CardContent>
+          </Card>
         </AnimatedDiv>
       </StaggerContainer>
 

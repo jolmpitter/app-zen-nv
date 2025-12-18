@@ -1,12 +1,13 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Inter, Outfit } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Providers } from '@/components/providers';
 import { Toaster } from 'sonner';
 import { GoogleAnalytics } from '@next/third-parties/google';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+const outfit = Outfit({ subsets: ['latin'], variable: '--font-display' });
 
 export const dynamic = 'force-dynamic';
 
@@ -23,13 +24,13 @@ export function generateViewport() {
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: 'GESTÃO ZEN',
+  title: 'POLODASH',
   description: 'Sistema profissional de gestão de tráfego pago e CRM com análise de ROI e métricas em tempo real',
-  applicationName: 'GESTÃO ZEN',
+  applicationName: 'POLODASH',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'GESTÃO ZEN',
+    title: 'POLODASH',
   },
   formatDetection: {
     telephone: false,
@@ -48,14 +49,14 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: 'website',
-    siteName: 'GESTÃO ZEN',
-    title: 'GESTÃO ZEN',
+    siteName: 'POLODASH',
+    title: 'POLODASH',
     description: 'Sistema profissional de gestão de tráfego pago e CRM',
     images: ['/og-image.png'],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'GESTÃO ZEN',
+    title: 'POLODASH',
     description: 'Sistema profissional de gestão de tráfego pago e CRM',
     images: ['/og-image.png'],
   },
@@ -68,7 +69,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR" className="dark" suppressHydrationWarning>
-      <body className={`${inter.className} bg-background text-foreground transition-colors duration-300`}>
+      <body className={`${inter.variable} ${outfit.variable} font-sans bg-background text-foreground transition-colors duration-300`}>
         <Providers>
           <ThemeProvider
             attribute="class"

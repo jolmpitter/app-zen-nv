@@ -1,12 +1,11 @@
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 generator client {
     provider = "prisma-client-js"
-    binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
-    output = "/home/ubuntu/gestao_trafego_crm/nextjs_space/node_modules/.prisma/client"
+    binaryTargets = ["native"]
 }
 
 model User {
@@ -14,13 +13,39 @@ model User {
   name                String
   email               String              @unique
   password            String
-  role                String              // "gerente", "gestor" ou "atendente"
-  avatarUrl           String?             // URL da foto de perfil
-  facebookAccessToken String?             // Token de acesso do Facebook Ads (deprecated - mantido para compatibilidade)
-  facebookAdAccountId String?             // ID da conta de anúncios do Facebook (deprecated - mantido para compatibilidade)
+  role                String              // "cio", "gerente", "gestor" ou "atendente"
+  status              String              @default("PENDIENTE") // "PENDIENTE", "ATIVO", "BLOQUEADO", "REJEITADO"
+  
+  // Gestão de Assinatura
+  subscriptionPlan    String?             // "TRIAL", "MENSAL", "TRIMESTRAL", "SEMESTRAL", "ANUAL"
+  subscriptionStatus  String?             @default("TRIAL") // "TRIAL", "ACTIVE", "EXPIRED"
+  expiresAt           DateTime?           // Data de expiração do plano/trial
+  
+  // Hierarquia Enterprise
+  companyId           String?
+  company             Company?            @relation(fields: [companyId], references: [id])
+  sectorId            String?
+  sector              Sector?             @relation(fields: [sectorId], references: [id])
+  teamId              String?
+  team                Team?               @relation(fields: [teamId], references: [id])
+
+  // Limites e Controle
+  adAccountLimit      Int                 @default(1) // Limite de contas de anúncios
+  
+  avatarUrl           String?
+  facebookAccessToken String?
+  facebookAdAccountId String?
+  
+  // Hierarquia Multi-tenant
+  gerenteId           String?             // Para Gerentes: null. Para outros: ID do Gerente dono da equipe.
   gestorId            String?             // Para atendentes: ID do gestor responsável
+  
+  gerente             User?               @relation("GerenteEquipe", fields: [gerenteId], references: [id], onDelete: SetNull)
+  equipe              User[]              @relation("GerenteEquipe")
+  
   gestor              User?               @relation("GestorAtendentes", fields: [gestorId], references: [id], onDelete: SetNull)
   atendentes          User[]              @relation("GestorAtendentes")
+  
   createdAt           DateTime            @default(now())
   updatedAt           DateTime            @updatedAt
 
@@ -33,10 +58,62 @@ model User {
   reportLinks        ReportLink[]
   campaignChangeLogs CampaignChangeLog[]
   alerts             Alert[]
+  objectives         Objective[]
+  auditLogs          AuditLog[]
 
   @@index([email])
   @@index([gestorId])
+  @@index([companyId])
   @@index([role])
+}
+
+model Company {
+  id              String   @id @default(cuid())
+  name            String
+  subdomain       String?  @unique
+  logoUrl         String?
+  themeSettings   String?  // JSON string: { primaryColor, secondaryColor, font, etc }
+  status          String   @default("ACTIVE") // ACTIVE, SUSPENDED
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  users           User[]
+  leads           Lead[]
+  dailyMetrics    DailyMetric[]
+  sectors         Sector[]
+  teams           Team[]
+  facebookAccounts FacebookAdAccount[]
+  whatsappInstances WhatsAppInstance[]
+  funnels         Funnel[]
+  cycles          Cycle[]
+  objectives      Objective[]
+  auditLogs       AuditLog[]
+  invitations     Invitation[]
+}
+
+model Sector {
+  id        String   @id @default(cuid())
+  name      String
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  teams     Team[]
+  users     User[]
+  objectives Objective[]
+
+  @@index([companyId])
+}
+
+model Team {
+  id        String   @id @default(cuid())
+  name      String
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  sectorId  String?
+  sector    Sector?  @relation(fields: [sectorId], references: [id], onDelete: SetNull)
+  users     User[]
+
+  @@index([companyId])
+  @@index([sectorId])
 }
 
 model DailyMetric {
@@ -63,13 +140,17 @@ model DailyMetric {
   valorComissao             Float    @default(0) // Valor total de comissão
   totalCliques              Int      @default(0) // Total de cliques
   cartaoUsado               String?  // Cartão usado para pagamento
+  gerenteId                 String?  // ID do gerente dono dos dados
+  companyId                 String?
+  company                   Company? @relation(fields: [companyId], references: [id])
   createdAt                 DateTime @default(now())
   updatedAt                 DateTime @updatedAt
 
   @@unique([userId, date])
   @@index([date])
   @@index([userId])
-  @@index([userId, date]) // Índice composto para queries de range de data por usuário
+  @@index([gerenteId])
+  @@index([userId, date]) 
   @@index([date, userId]) // Índice composto alternativo para ordenação por data
 }
 
@@ -82,26 +163,98 @@ model Lead {
   source          String?       // origem do lead
   valorPotencial  Float?        // valor potencial da venda
   valorFechado    Float?        // valor real da venda (se concluído)
-  notes           String?       @db.Text
+  notes           String?      
   cidade          String?       // cidade do lead
   estado          String?       // estado do lead (sigla: SP, RJ, etc.)
   atendenteId     String
   atendente       User          @relation(fields: [atendenteId], references: [id], onDelete: Cascade)
+  companyId       String?
+  company         Company?      @relation(fields: [companyId], references: [id])
+  gerenteId       String?       // ID do gerente dono deste lead
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
   closedAt        DateTime?     // data de conclusão/perda
 
   // Relações
   history         LeadHistory[]
+  
+  funnelId        String?
+  funnel          Funnel?       @relation(fields: [funnelId], references: [id])
+  stepId          String?
+  step            FunnelStep?   @relation(fields: [stepId], references: [id])
+  
+  messages        Message[]
+  tags            String?       // JSON string de tags
 
   @@index([atendenteId])
   @@index([status])
+  @@index([companyId])
+  @@index([funnelId])
+  @@index([stepId])
   @@index([createdAt])
   @@index([estado])
   @@index([cidade])
-  @@index([atendenteId, status]) // Índice composto para filtro por atendente e status
-  @@index([status, createdAt]) // Índice composto para filtro por status com ordenação por data
-  @@index([updatedAt]) // Índice para queries ordenadas por última atualização
+  @@index([atendenteId, status]) 
+  @@index([status, createdAt]) 
+  @@index([updatedAt]) 
+}
+
+model WhatsAppInstance {
+  id              String   @id @default(cuid())
+  name            String
+  phone           String?
+  type            String   @default("QR") // "QR" ou "METABUSINESS"
+  status          String   @default("DISCONNECTED") // CONNECTED, DISCONNECTED, INITIALIZING
+  qrCode          String?  // Armazena o último QR code gerado
+  companyId       String
+  company         Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  messages        Message[]
+
+  @@index([companyId])
+}
+
+model Message {
+  id                String   @id @default(cuid())
+  whatsappId        String
+  whatsapp          WhatsAppInstance @relation(fields: [whatsappId], references: [id], onDelete: Cascade)
+  leadId            String?
+  lead              Lead?    @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  fromMe            Boolean  @default(false)
+  type              String   @default("text") // text, audio, image, video, document
+  content           String   // Texto da mensagem ou URL da mídia
+  status            String   @default("sent") // sent, delivered, read, failed
+  timestamp         DateTime @default(now())
+  
+  @@index([whatsappId])
+  @@index([leadId])
+}
+
+model Funnel {
+  id              String   @id @default(cuid())
+  name            String
+  companyId       String
+  company         Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  steps           FunnelStep[]
+  leads           Lead[]
+
+  @@index([companyId])
+}
+
+model FunnelStep {
+  id              String   @id @default(cuid())
+  name            String
+  order           Int      @default(0)
+  funnelId        String
+  funnel          Funnel   @relation(fields: [funnelId], references: [id], onDelete: Cascade)
+  leads           Lead[]
+
+  @@index([funnelId])
 }
 
 model LeadHistory {
@@ -111,7 +264,7 @@ model LeadHistory {
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   action      String   // status_change, note_added, call_made, email_sent, etc.
-  description String   @db.Text
+  description String  
   oldValue    String?
   newValue    String?
   createdAt   DateTime @default(now())
@@ -126,8 +279,11 @@ model FacebookAdAccount {
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   accountName String   // Nome amigável da conta (ex: "Cliente X - Campanha Y")
   accountId   String   // ID da conta de anúncios (ex: act_123456789)
-  accessToken String   @db.Text // Token de acesso do Facebook Ads
+  accessToken String   // Token de acesso do Facebook Ads
   isActive    Boolean  @default(true) // Se esta conta está ativa/selecionada
+  companyId   String?
+  company     Company? @relation(fields: [companyId], references: [id])
+  gerenteId   String?  // ID do gerente dono desta conta
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -151,7 +307,7 @@ model ScheduledReport {
   dayOfWeek            Int?              // 0-6 (Domingo-Sábado) para relatórios semanais
   dayOfMonth           Int?              // 1-31 para relatórios mensais
   hour                 Int               @default(9) // Hora do dia para envio (0-23)
-  recipients           String            @db.Text // Emails separados por vírgula
+  recipients           String            // Emails separados por vírgula
   includeMetrics       Boolean           @default(true) // Incluir cards de métricas
   includeFunnel        Boolean           @default(true) // Incluir funil de conversão
   includeTimeSeries    Boolean           @default(true) // Incluir gráficos temporais
@@ -176,7 +332,7 @@ model ReportLink {
   userId            String
   user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   token             String          @unique // Token único para acesso público
-  reportData        String          @db.Text // JSON com dados do relatório
+  reportData        String          // JSON com dados do relatório
   expiresAt         DateTime?       // Data de expiração (opcional)
   viewCount         Int             @default(0)
   lastViewedAt      DateTime?
@@ -197,7 +353,7 @@ model CampaignChangeLog {
   changeType           String            // status_change, budget_change, name_change, etc
   previousValue        String?
   newValue             String?
-  metadata             String?           @db.Text // JSON string com detalhes adicionais
+  metadata             String?           // JSON string com detalhes adicionais
   createdAt            DateTime          @default(now())
 
   @@index([userId])
@@ -213,8 +369,8 @@ model Alert {
   type        String   // roi_negativo, conversao_baixa, gasto_excessivo, lead_nao_contatado, etc.
   severity    String   // baixa, media, alta, critica
   title       String   // Título do alerta
-  message     String   @db.Text // Mensagem detalhada
-  data        String?  @db.Text // JSON com dados relevantes
+  message     String   // Mensagem detalhada
+  data        String?  // JSON com dados relevantes
   isRead      Boolean  @default(false)
   isResolved  Boolean  @default(false)
   resolvedAt  DateTime?
@@ -229,4 +385,93 @@ model Alert {
   @@index([userId, isRead]) // Índice composto para alertas não lidos por usuário
   @@index([userId, isResolved]) // Índice composto para alertas não resolvidos por usuário
   @@index([userId, createdAt]) // Índice composto para alertas recentes por usuário
+}
+
+model Cycle {
+  id                String      @id @default(cuid())
+  name              String      // Ex: Q1 2024, Janeiro
+  startDate         DateTime
+  endDate           DateTime
+  companyId         String
+  company           Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  objectives        Objective[]
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  @@index([companyId])
+}
+
+model Objective {
+  id                String      @id @default(cuid())
+  title             String
+  description       String?
+  level             String      @default("COMPANY") // COMPANY, SECTOR, INDIVIDUAL
+  status            String      @default("IN_PROGRESS") // IN_PROGRESS, ACHIEVED, FAILED
+  progress          Float       @default(0) // 0-100
+  
+  companyId         String
+  company           Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  sectorId          String?
+  sector            Sector?      @relation(fields: [sectorId], references: [id], onDelete: SetNull)
+  userId            String?
+  user              User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  cycleId           String
+  cycle             Cycle       @relation(fields: [cycleId], references: [id], onDelete: Cascade)
+  
+  keyResults        KeyResult[]
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  @@index([companyId])
+  @@index([cycleId])
+}
+
+model KeyResult {
+  id                String      @id @default(cuid())
+  title             String
+  description       String?
+  initialValue      Float       @default(0)
+  targetValue       Float
+  currentValue      Float       @default(0)
+  weight            Float       @default(1) // Para cálculo ponderado do progresso do objetivo
+  unit              String?     // %, R$, leads, etc
+  
+  objectiveId       String
+  objective         Objective   @relation(fields: [objectiveId], references: [id], onDelete: Cascade)
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  @@index([objectiveId])
+}
+
+model AuditLog {
+  id                String   @id @default(cuid())
+  companyId         String
+  company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  userId            String?
+  user              User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action            String   // LOGIN, UPDATE_LEAD, DELETE_LEAD, etc.
+  details           String?  // JSON string
+  ipAddress         String?
+  createdAt         DateTime @default(now())
+
+  @@index([companyId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model Invitation {
+  id                String   @id @default(cuid())
+  companyId         String
+  company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  email             String
+  role              String   @default("atendente")
+  token             String   @unique
+  status            String   @default("PENDING") // PENDING, ACCEPTED, EXPIRED
+  expiresAt         DateTime
+  createdAt         DateTime @default(now())
+
+  @@index([companyId])
+  @@index([email])
+  @@index([token])
 }

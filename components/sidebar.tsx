@@ -21,6 +21,9 @@ import {
   X,
   Upload,
   Calendar,
+  ShieldCheck,
+  MessageSquare,
+  Target,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -38,7 +41,13 @@ export function Sidebar() {
       name: 'Dashboard',
       href: '/dashboard',
       icon: LayoutDashboard,
-      allowedRoles: ['gerente', 'gestor', 'atendente'],
+      allowedRoles: ['cio', 'gerente', 'gestor', 'atendente'],
+    },
+    {
+      name: 'Controle de Acesso',
+      href: '/controle-acesso',
+      icon: ShieldCheck,
+      allowedRoles: ['cio', 'gerente'],
     },
     {
       name: 'CRM',
@@ -47,16 +56,22 @@ export function Sidebar() {
       allowedRoles: ['gerente', 'gestor', 'atendente'],
     },
     {
+      name: 'WhatsApp',
+      href: '/whatsapp',
+      icon: MessageSquare,
+      allowedRoles: ['gerente', 'gestor', 'atendente'],
+    },
+    {
       name: 'Métricas',
       href: '/metricas',
       icon: BarChart3,
-      allowedRoles: ['gerente', 'gestor'],
+      allowedRoles: ['cio', 'gerente', 'gestor'],
     },
     {
       name: 'Importar Planilha',
       href: '/importar',
       icon: Upload,
-      allowedRoles: ['gerente', 'gestor'],
+      allowedRoles: ['cio', 'gerente', 'gestor'],
     },
     {
       name: 'Análise Semanal',
@@ -68,25 +83,31 @@ export function Sidebar() {
       name: 'Meta Ads',
       href: '/meta-ads',
       icon: TrendingUp,
-      allowedRoles: ['gerente', 'gestor'],
+      allowedRoles: ['cio', 'gerente', 'gestor'],
     },
     {
       name: 'Relatórios',
       href: '/relatorios',
       icon: FileText,
-      allowedRoles: ['gerente', 'gestor'],
+      allowedRoles: ['cio', 'gerente', 'gestor'],
     },
     {
       name: 'Usuários',
       href: '/usuarios',
       icon: UserCog,
-      allowedRoles: ['gerente', 'gestor'],
+      allowedRoles: ['cio', 'gerente', 'gestor'],
     },
     {
       name: 'Integrações',
       href: '/integracoes',
       icon: Zap,
-      allowedRoles: ['gerente', 'gestor'],
+      allowedRoles: ['cio', 'gerente', 'gestor'],
+    },
+    {
+      name: 'Enterprise',
+      href: '/enterprise',
+      icon: ShieldCheck,
+      allowedRoles: ['cio', 'gerente'],
     },
     {
       name: 'Perfil',
@@ -108,15 +129,15 @@ export function Sidebar() {
         <div className="flex items-center justify-center">
           {(!collapsed || isMobile) && (
             <div className="w-full h-16 flex items-center justify-center">
-              <h1 className="text-2xl font-bold text-white tracking-wider">
-                GESTÃO ZEN
+              <h1 className="text-2xl font-bold text-white tracking-wider font-display">
+                POLODASH
               </h1>
             </div>
           )}
           {collapsed && !isMobile && (
             <div className="w-12 h-12 flex items-center justify-center">
-              <span className="text-xl font-bold text-white">
-                ZEN
+              <span className="text-xl font-bold text-white font-display">
+                PD
               </span>
             </div>
           )}
@@ -135,7 +156,7 @@ export function Sidebar() {
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold truncate">{session?.user?.name || 'Usuário'}</p>
               <p className="text-xs text-white/70 truncate">
-                {session?.user?.role === 'gerente' ? 'Gerente' : session?.user?.role === 'gestor' ? 'Gestor' : 'Atendente'}
+                {session?.user?.role === 'cio' ? 'CIO' : session?.user?.role === 'gerente' ? 'Gerente' : session?.user?.role === 'gestor' ? 'Gestor' : 'Atendente'}
               </p>
             </div>
           )}

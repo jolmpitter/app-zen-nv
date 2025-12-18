@@ -7,6 +7,12 @@ declare module 'next-auth' {
     name: string;
     role: string;
     gestorId?: string | null;
+    gerenteId?: string | null;
+    companyId?: string | null;
+    sectorId?: string | null;
+    teamId?: string | null;
+    status?: string;
+    expiresAt?: Date | null;
   }
 
   interface Session {
@@ -19,5 +25,9 @@ declare module 'next-auth/jwt' {
     id: string;
     role: string;
     gestorId?: string | null;
+    gerenteId?: string | null;
+    companyId?: string | null;
+    sectorId?: string | null;
+    teamId?: string | null;
   }
 }

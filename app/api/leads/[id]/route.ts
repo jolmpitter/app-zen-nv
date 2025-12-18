@@ -159,17 +159,15 @@ export async function PATCH(
       },
     });
 
-    // Criar histórico geral se houver mudanças
-    if (changes?.length > 0 && status === undefined) {
-      await prisma.leadHistory.create({
-        data: {
-          leadId: params?.id || '',
-          userId: session.user.id,
-          action: 'lead_updated',
-          description: changes?.join(', '),
-        },
-      });
-    }
+    // Auditoria Enterprise
+    await prisma.auditLog.create({
+      data: {
+        companyId: session.user.companyId || '',
+        userId: session.user.id,
+        action: 'LEAD_UPDATED',
+        details: JSON.stringify({ leadId: params?.id, changes })
+      }
+    });
 
     return NextResponse.json(updatedLead);
   } catch (error) {
@@ -207,6 +205,16 @@ export async function DELETE(
 
     await prisma.lead.delete({
       where: { id: params?.id },
+    });
+
+    // Auditoria Enterprise
+    await prisma.auditLog.create({
+      data: {
+        companyId: session.user.companyId || '',
+        userId: session.user.id,
+        action: 'LEAD_DELETED',
+        details: JSON.stringify({ leadId: params?.id, name: lead.name })
+      }
     });
 
     return NextResponse.json({ message: 'Lead deletado com sucesso' });

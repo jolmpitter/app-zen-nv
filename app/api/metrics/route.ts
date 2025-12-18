@@ -19,68 +19,70 @@ export async function GET(req: NextRequest) {
     const userId = searchParams.get('userId');
     const gestorId = searchParams.get('gestorId');
 
-    // Construir filtro baseado no role
     const where: any = {};
+
+    // Isolamento Multi-tenant
+    if (session.user.role !== 'cio') {
+      const currentGerenteId = session.user.role === 'gerente' ? session.user.id : session.user.gerenteId;
+      where.gerenteId = currentGerenteId;
+    }
 
     // Filtro de datas
     if (startDate || endDate) {
       where.date = {};
-      if (startDate) {
-        where.date.gte = new Date(startDate);
-      }
-      if (endDate) {
-        where.date.lte = new Date(endDate);
-      }
+      if (startDate) where.date.gte = new Date(startDate);
+      if (endDate) where.date.lte = new Date(endDate);
     }
 
-    // Controle de acesso por role
+    // Controle de acesso detalhado por role dentro da equipe
     if (session.user.role === 'atendente') {
-      // Atendentes veem apenas seus próprios dados
       where.userId = session.user.id;
-    } else if (session.user.role === 'gestor' || session.user.role === 'gerente') {
-      // Gestor/Gerente podem filtrar por userId, gestorId ou ver todos
-      if (gestorId) {
-        // Filtrar por gestor e seus atendentes
+    } else if (session.user.role === 'gestor') {
+      if (gestorId === session.user.id) {
         const atendentes = await prisma.user.findMany({
-          where: {
-            OR: [
-              { id: gestorId },
-              { gestorId: gestorId },
-            ],
-          },
+          where: { OR: [{ id: session.user.id }, { gestorId: session.user.id }] },
           select: { id: true },
         });
-        where.userId = { in: atendentes?.map((a) => a?.id || '') };
+        where.userId = { in: atendentes.map(a => a.id) };
       } else if (userId) {
-        where.userId = userId;
+        // Valida se o userId pertence ao gestor
+        const target = await prisma.user.findUnique({ where: { id: userId }, select: { gestorId: true } });
+        if (target?.gestorId !== session.user.id && userId !== session.user.id) {
+          where.userId = 'NONE'; // Bloqueia consulta
+        } else {
+          where.userId = userId;
+        }
+      } else {
+        // Por padrão, gestor vê seus dados + seus atendentes
+        const atendentes = await prisma.user.findMany({
+          where: { OR: [{ id: session.user.id }, { gestorId: session.user.id }] },
+          select: { id: true },
+        });
+        where.userId = { in: atendentes.map(a => a.id) };
+      }
+    } else if (session.user.role === 'gerente' || session.user.role === 'cio') {
+      if (userId) where.userId = userId;
+      else if (gestorId) {
+        const atendentes = await prisma.user.findMany({
+          where: { OR: [{ id: gestorId }, { gestorId: gestorId }] },
+          select: { id: true },
+        });
+        where.userId = { in: atendentes.map(a => a.id) };
       }
     }
-    // Se não houver filtro, gestor/gerente veem todos
 
     const metrics = await prisma.dailyMetric.findMany({
       where,
       include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            role: true,
-          },
-        },
+        user: { select: { id: true, name: true, email: true, role: true } },
       },
-      orderBy: {
-        date: 'desc',
-      },
+      orderBy: { date: 'desc' },
     });
 
     return NextResponse.json(metrics);
   } catch (error) {
     console.error('Error fetching metrics:', error);
-    return NextResponse.json(
-      { error: 'Erro ao buscar métricas' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Erro ao buscar métricas' }, { status: 500 });
   }
 }
 
@@ -92,77 +94,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
+    const currentGerenteId = session.user.role === 'gerente' ? session.user.id : session.user.gerenteId;
+
+    if (!currentGerenteId && session.user.role !== 'cio') {
+      return NextResponse.json({ error: 'Gerente da equipe não identificado' }, { status: 400 });
+    }
+
     const body = await req.json();
-    const { 
-      date, 
-      userId, 
-      valorGasto, 
-      quantidadeLeads, 
-      quantidadeVendas, 
-      valorVendido,
-      quantidadeVendasOrganicas,
-      valorVendidoOrganico,
-      // Novos campos detalhados
-      bmName,
-      contaAnuncio,
-      criativo,
-      pagina,
-      valorComissao,
-      totalCliques,
-      cartaoUsado
+    const {
+      date, userId, valorGasto, quantidadeLeads, quantidadeVendas, valorVendido,
+      quantidadeVendasOrganicas, valorVendidoOrganico, bmName, contaAnuncio,
+      criativo, pagina, valorComissao, totalCliques, cartaoUsado
     } = body;
 
-    // Validações
     if (!date || !userId) {
-      return NextResponse.json(
-        { error: 'Data e usuário são obrigatórios' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Data e usuário são obrigatórios' }, { status: 400 });
     }
-
-    if (valorGasto === undefined || quantidadeLeads === undefined || 
-        quantidadeVendas === undefined || valorVendido === undefined) {
-      return NextResponse.json(
-        { error: 'Todos os valores numéricos são obrigatórios' },
-        { status: 400 }
-      );
-    }
-
-    // Verificar se usuário existe e se há permissão
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        id: true,
-        gestorId: true,
-      },
-    });
-
-    if (!user) {
-      return NextResponse.json(
-        { error: 'Usuário não encontrado' },
-        { status: 404 }
-      );
-    }
-
-    // Validar permissão baseada no role
-    if (session.user.role === 'atendente') {
-      // Atendente só pode criar métricas para si mesmo
-      if (userId !== session.user.id) {
-        return NextResponse.json(
-          { error: 'Você só pode criar métricas para si mesmo' },
-          { status: 403 }
-        );
-      }
-    } else if (session.user.role === 'gestor') {
-      // Gestor só pode criar métricas para seus atendentes
-      if (user.gestorId !== session.user.id && userId !== session.user.id) {
-        return NextResponse.json(
-          { error: 'Você não tem permissão para criar métricas para este usuário' },
-          { status: 403 }
-        );
-      }
-    }
-    // Gerente pode criar métricas para qualquer usuário
 
     // Calcular KPIs
     const roi = valorGasto > 0 ? ((valorVendido - valorGasto) / valorGasto) * 100 : 0;
@@ -170,11 +117,11 @@ export async function POST(req: NextRequest) {
     const taxaConversao = quantidadeLeads > 0 ? (quantidadeVendas / quantidadeLeads) * 100 : 0;
     const ticketMedio = quantidadeVendas > 0 ? valorVendido / quantidadeVendas : 0;
 
-    // Criar métrica
     const metric = await prisma.dailyMetric.create({
       data: {
         date: new Date(date),
         userId,
+        gerenteId: currentGerenteId,
         valorGasto,
         quantidadeLeads,
         quantidadeVendas,
@@ -185,7 +132,6 @@ export async function POST(req: NextRequest) {
         custoPorLead,
         taxaConversao,
         ticketMedio,
-        // Novos campos detalhados
         bmName: bmName || null,
         contaAnuncio: contaAnuncio || null,
         criativo: criativo || null,
@@ -195,23 +141,13 @@ export async function POST(req: NextRequest) {
         cartaoUsado: cartaoUsado || null,
       },
       include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            role: true,
-          },
-        },
+        user: { select: { id: true, name: true, email: true, role: true } },
       },
     });
 
     return NextResponse.json(metric, { status: 201 });
   } catch (error) {
     console.error('Error creating metric:', error);
-    return NextResponse.json(
-      { error: 'Erro ao criar métrica' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Erro ao criar métrica' }, { status: 500 });
   }
 }

@@ -101,14 +101,14 @@ export class PDFGenerator {
   private addHeader(accountName: string, period: string) {
     // Logo/Título
     this.doc.setFontSize(24);
-    this.doc.setTextColor(34, 139, 34); // Verde
-    this.doc.text('GESTÃO ZEN', this.margin, this.currentY);
+    this.doc.setTextColor(16, 185, 129); // Emerald-500 (Branding POLODASH)
+    this.doc.text('POLODASH', this.margin, this.currentY);
 
     // Subtítulo
     this.doc.setFontSize(16);
     this.doc.setTextColor(0, 0, 0);
     this.currentY += 10;
-    this.doc.text('Relatório de Meta Ads', this.margin, this.currentY);
+    this.doc.text('Relatorio de Performance Ads', this.margin, this.currentY);
 
     // Informações da conta
     this.doc.setFontSize(10);
@@ -140,7 +140,7 @@ export class PDFGenerator {
     // Título da seção
     this.doc.setFontSize(14);
     this.doc.setTextColor(0, 0, 0);
-    this.doc.text('📊 Métricas Principais', this.margin, this.currentY);
+    this.doc.text('Metricas Principais', this.margin, this.currentY);
     this.currentY += 8;
 
     // Cards de métricas em grid 2x2
@@ -220,7 +220,7 @@ export class PDFGenerator {
     // Título da seção
     this.doc.setFontSize(14);
     this.doc.setTextColor(0, 0, 0);
-    this.doc.text('🎯 Funil de Conversão', this.margin, this.currentY);
+    this.doc.text('Funil de Conversao', this.margin, this.currentY);
     this.currentY += 8;
 
     const funnelStages = [
@@ -314,7 +314,7 @@ export class PDFGenerator {
     // Título da seção
     this.doc.setFontSize(14);
     this.doc.setTextColor(0, 0, 0);
-    this.doc.text('📈 Evolução Diária', this.margin, this.currentY);
+    this.doc.text('Evolucao Diaria', this.margin, this.currentY);
     this.currentY += 5;
 
     // Preparar dados da tabela
@@ -372,7 +372,7 @@ export class PDFGenerator {
       this.doc.setFontSize(8);
       this.doc.setTextColor(100, 100, 100);
       this.doc.text(
-        'GESTÃO ZEN - Sistema de Gestão de Tráfego Pago',
+        'POLODASH - Inteligencia em Trafego Pago',
         this.margin,
         this.pageHeight - 10
       );

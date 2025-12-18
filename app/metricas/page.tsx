@@ -117,12 +117,12 @@ export default function MetricasPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  
+
   // Estados de paginação
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 15;
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  
+
   // Hooks de otimização de performance
   const { ref: headerRef, shouldAnimate: shouldAnimateHeader } = useLazyAnimation({ threshold: 0.1, triggerOnce: true });
   const { ref: tableRef, shouldAnimate: shouldAnimateTable } = useLazyAnimation({ threshold: 0.05, triggerOnce: true, delay: 100 });
@@ -168,7 +168,7 @@ export default function MetricasPage() {
       const response = await fetch('/api/metrics');
       if (response.ok) {
         const data = await response.json();
-        setMetrics(data);
+        setMetrics(Array.isArray(data) ? data : []);
       }
     } catch (error) {
       console.error('Erro ao buscar métricas:', error);
@@ -183,7 +183,7 @@ export default function MetricasPage() {
       const response = await fetch('/api/users');
       if (response.ok) {
         const data = await response.json();
-        setUsers(data);
+        setUsers(Array.isArray(data) ? data : []);
       }
     } catch (error) {
       console.error('Erro ao buscar usuários:', error);
@@ -420,7 +420,7 @@ export default function MetricasPage() {
 
     try {
       const reader = new FileReader();
-      
+
       reader.onload = async (event) => {
         try {
           const data = event.target?.result;
@@ -451,8 +451,8 @@ export default function MetricasPage() {
               let date;
               if (dateParts && dateParts.length === 3) {
                 date = new Date(
-                  parseInt(dateParts[2]), 
-                  parseInt(dateParts[1]) - 1, 
+                  parseInt(dateParts[2]),
+                  parseInt(dateParts[1]) - 1,
                   parseInt(dateParts[0])
                 ).toISOString();
               } else {
@@ -543,7 +543,7 @@ export default function MetricasPage() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentMetrics = filteredMetrics?.slice(startIndex, endIndex) || [];
-  
+
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -590,7 +590,7 @@ export default function MetricasPage() {
       </Button>
 
       {/* Header */}
-      <AnimatedDiv 
+      <AnimatedDiv
         ref={headerRef}
         className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
         variants={shouldAnimateHeader ? fadeInUp : undefined}
@@ -619,7 +619,7 @@ export default function MetricasPage() {
             <Plus className="w-4 h-4 mr-2" />
             Nova Métrica
           </Button>
-          
+
           <Button
             onClick={handleExportExcel}
             variant="outline"
@@ -628,7 +628,7 @@ export default function MetricasPage() {
             <Download className="w-4 h-4 mr-2" />
             Exportar Excel
           </Button>
-          
+
           <Button
             onClick={() => document.getElementById('excel-upload')?.click()}
             variant="outline"
@@ -666,162 +666,162 @@ export default function MetricasPage() {
         animate="visible"
       >
         <div className="bg-card rounded-lg shadow-md overflow-hidden border border-border">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-secondary/50">
-                <TableHead>Data</TableHead>
-                <TableHead>Usuário</TableHead>
-                <TableHead>Gasto</TableHead>
-                <TableHead>Leads</TableHead>
-                <TableHead>Vendas</TableHead>
-                <TableHead>Valor Vendido</TableHead>
-                <TableHead>ROI</TableHead>
-                <TableHead>Custo/Lead</TableHead>
-                <TableHead>Taxa Conv.</TableHead>
-                <TableHead>Ticket Médio</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredMetrics?.length === 0 ? (
-                <TableRow>
-                  <TableCell
-                    colSpan={11}
-                    className="text-center py-8 text-gray-500 dark:text-gray-400"
-                  >
-                    Nenhuma métrica encontrada
-                  </TableCell>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-secondary/50">
+                  <TableHead>Data</TableHead>
+                  <TableHead>Usuário</TableHead>
+                  <TableHead>Gasto</TableHead>
+                  <TableHead>Leads</TableHead>
+                  <TableHead>Vendas</TableHead>
+                  <TableHead>Valor Vendido</TableHead>
+                  <TableHead>ROI</TableHead>
+                  <TableHead>Custo/Lead</TableHead>
+                  <TableHead>Taxa Conv.</TableHead>
+                  <TableHead>Ticket Médio</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
-              ) : (
-                currentMetrics?.map((metric, index) => (
-                  <AnimatedTableRow
-                    key={metric?.id}
-                    custom={index}
-                    initial="hidden"
-                    animate="visible"
-                    variants={staggerItem}
-                    className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
-                  >
-                    <TableCell className="font-medium">
-                      {new Date(metric?.date)?.toLocaleDateString('pt-BR')}
+              </TableHeader>
+              <TableBody>
+                {filteredMetrics?.length === 0 ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={11}
+                      className="text-center py-8 text-gray-500 dark:text-gray-400"
+                    >
+                      Nenhuma métrica encontrada
                     </TableCell>
-                    <TableCell>
-                      <div>
-                        <div className="font-medium">{metric?.user?.name}</div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">
-                          {metric?.user?.email}
+                  </TableRow>
+                ) : (
+                  currentMetrics?.map((metric, index) => (
+                    <AnimatedTableRow
+                      key={metric?.id}
+                      custom={index}
+                      initial="hidden"
+                      animate="visible"
+                      variants={staggerItem}
+                      className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+                    >
+                      <TableCell className="font-medium">
+                        {new Date(metric?.date)?.toLocaleDateString('pt-BR')}
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                          <div className="font-medium">{metric?.user?.name}</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">
+                            {metric?.user?.email}
+                          </div>
                         </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-red-600 font-semibold">
-                      {formatCurrency(Number(metric?.valorGasto))}
-                    </TableCell>
-                    <TableCell>{metric?.quantidadeLeads}</TableCell>
-                    <TableCell>{metric?.quantidadeVendas}</TableCell>
-                    <TableCell className="text-green-600 font-semibold">
-                      {formatCurrency(Number(metric?.valorVendido))}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="outline"
-                        className={
-                          Number(metric?.roi) >= 0
-                            ? 'border-green-600 text-green-600'
-                            : 'border-red-600 text-red-600'
-                        }
-                      >
-                        {formatPercentage(Number(metric?.roi))}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {formatCurrency(Number(metric?.custoPorLead))}
-                    </TableCell>
-                    <TableCell>
-                      {formatPercentage(Number(metric?.taxaConversao))}
-                    </TableCell>
-                    <TableCell>
-                      {formatCurrency(Number(metric?.ticketMedio))}
-                    </TableCell>
-                    <TableCell className="text-right space-x-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleOpenDialog(metric)}
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setDeletingMetric(metric);
-                          setIsDeleteDialogOpen(true);
-                        }}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </TableCell>
-                  </AnimatedTableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
-        
-        {/* Paginação */}
-        {totalPages > 1 && (
-          <div className="py-4 flex justify-center border-t border-border">
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious
-                    onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)}
-                    className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                  />
-                </PaginationItem>
-                
-                {/* Páginas */}
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
-                  // Mostrar apenas páginas próximas à página atual
-                  if (
-                    page === 1 ||
-                    page === totalPages ||
-                    (page >= currentPage - 1 && page <= currentPage + 1)
-                  ) {
-                    return (
-                      <PaginationItem key={page}>
-                        <PaginationLink
-                          onClick={() => handlePageChange(page)}
-                          isActive={currentPage === page}
-                          className="cursor-pointer"
+                      </TableCell>
+                      <TableCell className="text-red-600 font-semibold">
+                        {formatCurrency(Number(metric?.valorGasto))}
+                      </TableCell>
+                      <TableCell>{metric?.quantidadeLeads}</TableCell>
+                      <TableCell>{metric?.quantidadeVendas}</TableCell>
+                      <TableCell className="text-green-600 font-semibold">
+                        {formatCurrency(Number(metric?.valorVendido))}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className={
+                            Number(metric?.roi) >= 0
+                              ? 'border-green-600 text-green-600'
+                              : 'border-red-600 text-red-600'
+                          }
                         >
-                          {page}
-                        </PaginationLink>
-                      </PaginationItem>
-                    );
-                  } else if (page === currentPage - 2 || page === currentPage + 2) {
-                    return (
-                      <PaginationItem key={page}>
-                        <PaginationEllipsis />
-                      </PaginationItem>
-                    );
-                  }
-                  return null;
-                })}
-                
-                <PaginationItem>
-                  <PaginationNext
-                    onClick={() => currentPage < totalPages && handlePageChange(currentPage + 1)}
-                    className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
+                          {formatPercentage(Number(metric?.roi))}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {formatCurrency(Number(metric?.custoPorLead))}
+                      </TableCell>
+                      <TableCell>
+                        {formatPercentage(Number(metric?.taxaConversao))}
+                      </TableCell>
+                      <TableCell>
+                        {formatCurrency(Number(metric?.ticketMedio))}
+                      </TableCell>
+                      <TableCell className="text-right space-x-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleOpenDialog(metric)}
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setDeletingMetric(metric);
+                            setIsDeleteDialogOpen(true);
+                          }}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </TableCell>
+                    </AnimatedTableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
           </div>
-        )}
-      </div>
+
+          {/* Paginação */}
+          {totalPages > 1 && (
+            <div className="py-4 flex justify-center border-t border-border">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)}
+                      className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                    />
+                  </PaginationItem>
+
+                  {/* Páginas */}
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                    // Mostrar apenas páginas próximas à página atual
+                    if (
+                      page === 1 ||
+                      page === totalPages ||
+                      (page >= currentPage - 1 && page <= currentPage + 1)
+                    ) {
+                      return (
+                        <PaginationItem key={page}>
+                          <PaginationLink
+                            onClick={() => handlePageChange(page)}
+                            isActive={currentPage === page}
+                            className="cursor-pointer"
+                          >
+                            {page}
+                          </PaginationLink>
+                        </PaginationItem>
+                      );
+                    } else if (page === currentPage - 2 || page === currentPage + 2) {
+                      return (
+                        <PaginationItem key={page}>
+                          <PaginationEllipsis />
+                        </PaginationItem>
+                      );
+                    }
+                    return null;
+                  })}
+
+                  <PaginationItem>
+                    <PaginationNext
+                      onClick={() => currentPage < totalPages && handlePageChange(currentPage + 1)}
+                      className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
+        </div>
       </AnimatedDiv>
 
       {/* Create/Edit Dialog */}
@@ -955,7 +955,7 @@ export default function MetricasPage() {
               <p className="text-xs text-green-700 dark:text-green-400 mb-3">
                 Registre vendas de leads que já estavam na base (sem custo de tráfego)
               </p>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="quantidadeVendasOrganicas" className="text-green-800 dark:text-green-300">
@@ -1005,7 +1005,7 @@ export default function MetricasPage() {
               <p className="text-xs text-blue-700 dark:text-blue-400 mb-3">
                 Informações adicionais sobre a campanha e forma de pagamento
               </p>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="bmName" className="text-blue-800 dark:text-blue-300">

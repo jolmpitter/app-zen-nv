@@ -5,7 +5,7 @@ import { prisma } from './db';
 import bcrypt from 'bcryptjs';
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
+  // adapter: PrismaAdapter(prisma),
   providers: [
     CredentialsProvider({
       name: 'Credentials',
@@ -18,15 +18,18 @@ export const authOptions: NextAuthOptions = {
           throw new Error('Email e senha são obrigatórios');
         }
 
+        const email = credentials.email.trim().toLowerCase();
+
         const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
+          where: { email },
           include: {
             gestor: true,
           },
         });
 
         if (!user) {
-          throw new Error('Credenciais inválidas');
+          console.log(`[AUTH] Login falhou: usuário não encontrado (${email})`);
+          throw new Error('Usuário não encontrado');
         }
 
         const isPasswordValid = await bcrypt.compare(
@@ -38,12 +41,43 @@ export const authOptions: NextAuthOptions = {
           throw new Error('Credenciais inválidas');
         }
 
+        if (user.status !== 'ATIVO' && user.role !== 'cio') {
+          if (user.status === 'PENDIENTE') throw new Error('Seu cadastro aguarda aprovação');
+          if (user.status === 'BLOQUEADO') throw new Error('Sua conta foi bloqueada');
+          if (user.status === 'REJEITADO') throw new Error('Seu cadastro foi rejeitado');
+        }
+
+        // Validar expiração (exceto para CIO)
+        if (user.role !== 'cio' && user.expiresAt && new Date(user.expiresAt) < new Date()) {
+          throw new Error('Sua assinatura expirou. Entre em contato com o suporte.');
+        }
+
+        // Registrar Auditoria de Login (não bloqueante)
+        try {
+          await prisma.auditLog.create({
+            data: {
+              companyId: user.companyId || '',
+              userId: user.id,
+              action: 'LOGIN',
+              details: JSON.stringify({ email: user.email, role: user.role })
+            }
+          });
+        } catch (auditError) {
+          console.error('Erro ao registrar log de auditoria:', auditError);
+        }
+
         return {
           id: user.id,
           email: user.email,
           name: user.name,
           role: user.role,
           gestorId: user.gestorId,
+          gerenteId: user.gerenteId,
+          companyId: user.companyId,
+          sectorId: user.sectorId,
+          teamId: user.teamId,
+          status: user.status,
+          expiresAt: user.expiresAt,
         };
       },
     }),
@@ -53,7 +87,11 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id;
         token.role = user.role;
-        token.gestorId = user.gestorId;
+        token.gestorId = (user as any).gestorId;
+        token.gerenteId = (user as any).gerenteId;
+        token.companyId = (user as any).companyId;
+        token.sectorId = (user as any).sectorId;
+        token.teamId = (user as any).teamId;
       }
       return token;
     },
@@ -62,6 +100,10 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.id as string;
         session.user.role = token.role as string;
         session.user.gestorId = token.gestorId as string | null;
+        session.user.gerenteId = token.gerenteId as string | null;
+        session.user.companyId = token.companyId as string | null;
+        session.user.sectorId = token.sectorId as string | null;
+        session.user.teamId = token.teamId as string | null;
       }
       return session;
     },

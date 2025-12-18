@@ -10,7 +10,7 @@ export async function PATCH(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json(
         { error: 'Não autorizado' },
@@ -60,16 +60,13 @@ export async function PATCH(
     // Atualizar campanha
     const result = await metaAdsAPI.updateCampaign(campaignId, { status, dailyBudget });
 
-    // Registrar no histórico
-    await prisma.campaignChangeLog.create({
+    // Auditoria Enterprise
+    await prisma.auditLog.create({
       data: {
+        companyId: session.user.companyId || '',
         userId: session.user.id,
-        facebookAdAccountId: account.id,
-        campaignId,
-        changeType: status ? 'status_change' : 'budget_change',
-        previousValue: '',
-        newValue: status || dailyBudget?.toString() || '',
-        metadata: JSON.stringify({ status, dailyBudget })
+        action: status ? 'META_ADS_STATUS_CHANGE' : 'META_ADS_BUDGET_CHANGE',
+        details: JSON.stringify({ campaignId, status, dailyBudget })
       }
     });
 

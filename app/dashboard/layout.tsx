@@ -4,6 +4,8 @@ import { Sidebar } from '@/components/sidebar';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import { NotificationsBell } from '@/components/notifications-bell';
+import { UserAvatar } from '@/components/user-avatar';
 
 export default function DashboardLayout({
   children,
@@ -35,10 +37,22 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#091a14]">
       <Sidebar />
       <main className="pl-64 min-h-screen transition-all duration-300">
-        {children}
+        <header className="h-16 border-b border-white/5 bg-[#091a14]/80 backdrop-blur-md sticky top-0 z-30 flex items-center justify-between px-8">
+          <div className="flex items-center gap-4">
+            {/* Espaço para pão de trigo ou título dinâmico se necessário */}
+          </div>
+          <div className="flex items-center gap-3">
+            <NotificationsBell />
+            <div className="h-8 w-[1px] bg-white/10 mx-2" />
+            <UserAvatar name={session.user.name || 'Usuário'} />
+          </div>
+        </header>
+        <div className="p-0">
+          {children}
+        </div>
       </main>
     </div>
   );
