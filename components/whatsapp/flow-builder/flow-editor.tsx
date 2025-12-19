@@ -14,7 +14,10 @@ import {
     useEdgesState,
     Panel,
     BackgroundVariant,
-    MiniMap
+    MiniMap,
+    ConnectionMode,
+    ConnectionLineType,
+    MarkerType
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
@@ -286,6 +289,13 @@ export function FlowEditor({ id }: { id?: string }) {
                         nodeTypes={nodeTypes}
                         fitView
                         colorMode="dark"
+                        connectionMode={ConnectionMode.Loose}
+                        connectionLineType={ConnectionLineType.SmoothStep}
+                        defaultEdgeOptions={{
+                            animated: true,
+                            style: { stroke: '#a855f7', strokeWidth: 2 },
+                            markerEnd: { type: MarkerType.ArrowClosed, color: '#a855f7' }
+                        }}
                     >
                         <Background color="#1a1a2e" variant={BackgroundVariant.Dots} gap={30} size={1} />
                         <Controls className="!bg-[#0a0a0f] !border-white/10 !rounded-xl overflow-hidden !m-4" />
