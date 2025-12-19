@@ -16,6 +16,7 @@ import {
   User,
   ArrowLeft,
 } from 'lucide-react';
+import { PageHeader } from '@/components/layout/page-header';
 import { fadeInUp, fadeIn, staggerItem } from '@/lib/animations';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
