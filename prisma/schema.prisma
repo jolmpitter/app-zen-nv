@@ -217,12 +217,17 @@ model WhatsAppInstance {
   qrCode          String?  // Armazena o último QR code gerado
   companyId       String
   company         Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  // Linked automation flow
+  flowId          String?
+  
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
   messages        Message[]
 
   @@index([companyId])
+  @@index([flowId])
 }
 
 model Message {
