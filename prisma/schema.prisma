@@ -493,6 +493,12 @@ model AutomationFlow {
   // JSON state of the flow (nodes and edges)
   flowContext     String?  // JSON string: { nodes: [], edges: [] }
   
+  // GPT Configuration
+  gptEnabled      Boolean  @default(false)
+  gptModel        String   @default("gpt-4")
+  gptTemperature  Float    @default(0.7)
+  gptSystemPrompt String?  // Custom system prompt for humanized responses
+  
   companyId       String
   company         Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
   
@@ -501,3 +507,34 @@ model AutomationFlow {
 
   @@index([companyId])
 }
+
+model Tag {
+  id          String   @id @default(cuid())
+  name        String
+  color       String   @default("#6366f1")
+  description String?
+  companyId   String
+  createdAt   DateTime @default(now())
+  
+  @@unique([companyId, name])
+  @@index([companyId])
+}
+
+model AILog {
+  id             String   @id @default(cuid())
+  leadId         String?
+  whatsappId     String?
+  companyId      String
+  prompt         String   @db.Text
+  response       String   @db.Text
+  tokens         Int      @default(0)
+  model          String   @default("gpt-4")
+  temperature    Float    @default(0.7)
+  latencyMs      Int?     // Response time in milliseconds
+  createdAt      DateTime @default(now())
+  
+  @@index([companyId])
+  @@index([leadId])
+  @@index([createdAt])
+}
+

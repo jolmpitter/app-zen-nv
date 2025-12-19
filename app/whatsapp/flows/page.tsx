@@ -29,6 +29,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { GPTConfigModal } from '@/components/whatsapp/gpt-config-modal';
+import { CommandCards } from '@/components/automation/command-cards';
 
 export default function AutomationFlowsPage() {
     const router = useRouter();
@@ -105,6 +106,14 @@ export default function AutomationFlowsPage() {
                 title="Automações de Chat"
                 subtitle="Crie fluxos de atendimento inteligentes e automáticos."
             />
+
+            {/* Command Cards */}
+            <div className="mb-2">
+                <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                    <Zap className="w-5 h-5 text-primary" /> Comandos Rápidos
+                </h2>
+                <CommandCards />
+            </div>
 
             <div className="flex justify-end">
                 <Button
